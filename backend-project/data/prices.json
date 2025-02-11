@@ -17,40 +17,22 @@
       "price": 350.73
     }
   ],
-  "2025-02-11T05:01:34.562Z": [
+  "2025-02-11T22:54:49.544Z": [
     {
       "company name": "U",
-      "price": 20.4
+      "price": 19.53
     },
     {
       "company name": "PLTR",
-      "price": 116.65
+      "price": 112.62
     },
     {
       "company name": "UBER",
-      "price": 78.63
+      "price": 76.9
     },
     {
       "company name": "TSLA",
-      "price": 350.73
-    }
-  ],
-  "2025-02-11T06:01:33.941Z": [
-    {
-      "company name": "U",
-      "price": 20.4
-    },
-    {
-      "company name": "PLTR",
-      "price": 116.65
-    },
-    {
-      "company name": "UBER",
-      "price": 78.63
-    },
-    {
-      "company name": "TSLA",
-      "price": 350.73
+      "price": 328.5
     }
   ]
 }
