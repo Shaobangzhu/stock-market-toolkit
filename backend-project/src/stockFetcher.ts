@@ -1,11 +1,7 @@
 import axios from "axios";
 import fs from "fs";
 
-const API_KEY = "IDKPZZVM3N4664J7";
-const STOCK_SYMBOLS = ["U", "PLTR", "UBER", "TSLA"];
-const TIME_TAG = new Date().toISOString();
-const DATA_FILE_PATH =
-  "C:/Projects/daytrade-framework/backend-project/data/prices.json";
+import { API_KEY, STOCK_SYMBOLS, TIME_TAG, DATA_FILE_PATH } from "./constants";
 
 interface StockData {
   "company name": string;
