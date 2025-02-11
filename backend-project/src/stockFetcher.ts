@@ -1,6 +1,5 @@
 import axios from "axios";
 import fs from "fs";
-import path from "path";
 
 const API_KEY = "IDKPZZVM3N4664J7";
 const STOCK_SYMBOLS = ["U", "PLTR", "UBER", "TSLA"];
