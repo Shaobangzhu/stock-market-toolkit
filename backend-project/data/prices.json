@@ -34,5 +34,23 @@
       "company name": "TSLA",
       "price": 350.73
     }
+  ],
+  "2025-02-11T06:01:33.941Z": [
+    {
+      "company name": "U",
+      "price": 20.4
+    },
+    {
+      "company name": "PLTR",
+      "price": 116.65
+    },
+    {
+      "company name": "UBER",
+      "price": 78.63
+    },
+    {
+      "company name": "TSLA",
+      "price": 350.73
+    }
   ]
 }
