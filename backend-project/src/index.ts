@@ -9,6 +9,19 @@ interface StockData {
     price: number;
 }
 
+/**
+ * Fetches the latest stock price for a given symbol from Alpha Vantage API.
+ * 
+ * @param {string} symbol - The stock symbol (e.g., "U", "PLTR").
+ * @returns {Promise<StockData | null>} A promise that resolves to an object containing the company name and stock price, or `null` if data is unavailable or an error occurs.
+ * 
+ * @example
+ * const stockData = await fetchStockPrice("AAPL");
+ * console.log(stockData);
+ * // Output: { "company name": "AAPL", price: 180.25 } (example data)
+ * 
+ * @throws Logs an error message if the API request fails.
+ */
 async function fetchStockPrice(symbol: string): Promise<StockData | null> {
     try {
         const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`;
@@ -30,6 +43,29 @@ async function fetchStockPrice(symbol: string): Promise<StockData | null> {
     }
 }
 
+/**
+ * Fetches stock prices for multiple stock symbols and formats the data.
+ * 
+ * @returns {Promise<void>} A promise that resolves when all stock prices are fetched and logged to the console.
+ * 
+ * @description
+ * - This function retrieves stock prices for all symbols listed in `STOCK_SYMBOLS` using `fetchStockPrice()`.
+ * - It waits for all API calls to complete using `Promise.all()`.
+ * - The resulting data is filtered to remove `null` values and is formatted into an object with a timestamp (`TIME_TAG`) as the key.
+ * - The formatted stock data is then logged in JSON format.
+ * 
+ * @example
+ * await getStockPrices();
+ * // Output:
+ * // {
+ * //   "2025-02-09T12:34:56.789Z": [
+ * //     { "company name": "AAPL", "price": 180 },
+ * //     { "company name": "GOOGL", "price": 2900 },
+ * //     { "company name": "MSFT", "price": 320 },
+ * //     { "company name": "AMZN", "price": 3400 }
+ * //   ]
+ * // }
+ */
 async function getStockPrices(): Promise<void> {
     const stockPromises = STOCK_SYMBOLS.map(symbol => fetchStockPrice(symbol));
     const stockData = await Promise.all(stockPromises);
