@@ -12,11 +12,21 @@ class StockPriceFetcher {
   private _timeTag: string;
   private _dataFilePath: string;
 
-  constructor(apiKey: string, stockSymbols: string[], timeTag: string, dataFilePath: string) {
+  constructor(
+    apiKey: string,
+    stockSymbols: string[],
+    timeTag: string,
+    dataFilePath: string
+  ) {
     this._apiKey = apiKey;
     this._stockSymbols = stockSymbols;
     this._timeTag = timeTag;
     this._dataFilePath = dataFilePath;
+  }
+
+  async fetchAndSaveData(): Promise<void> {
+    const formattedData = await this._fetchAndFormatStockData();
+    this._SaveStockPrices(formattedData);
   }
 
   /**
@@ -32,7 +42,9 @@ class StockPriceFetcher {
    *
    * @throws Logs an error message if the API request fails.
    */
-  private async fetchStockPrice(symbol: string): Promise<StockData | null> {
+  private async _fetchStockPriceFromAlphaVantage(
+    symbol: string
+  ): Promise<StockData | null> {
     try {
       const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${this._apiKey}`;
       const response = await axios.get(url);
@@ -54,6 +66,28 @@ class StockPriceFetcher {
   }
 
   /**
+   * Fetches stock prices for multiple stock symbols and formats the data.
+   *
+   * @returns {Promise<Record<string, StockData[]>>} A promise that resolves to an object containing stock data,
+   *          where the key is a timestamp and the value is an array of stock prices.
+   *
+   * @description
+   * - This helper method is responsible for making API calls for all stock symbols.
+   * - It filters out `null` values and returns structured data with a timestamp.
+   * - This method does **not** handle file operations.
+   */
+  private async _fetchAndFormatStockData(): Promise<Record<string, StockData[]>> {
+    const stockPromises = this._stockSymbols.map((symbol) =>
+      this._fetchStockPriceFromAlphaVantage(symbol)
+    );
+    const stockData = await Promise.all(stockPromises);
+
+    return {
+      [this._timeTag]: stockData.filter((stock) => stock !== null),
+    };
+  }
+
+  /**
    * Fetches, formats, and saves stock price data to a JSON file.
    *
    * @returns {Promise<void>} A promise that resolves once the data has been written to the file.
@@ -64,8 +98,9 @@ class StockPriceFetcher {
    * - Saves the updated stock data back to the file.
    * - Logs an error if reading/parsing the JSON file fails.
    */
-  async formatAndSaveStockPrices(): Promise<void> {
-    const formattedData = await this._fetchAndFormatStockData();
+  private async _SaveStockPrices(
+    formattedData: Record<string, StockData[]>
+  ): Promise<void> {
     let fileContent: Record<string, StockData[]> = {};
 
     if (fs.existsSync(this._dataFilePath)) {
@@ -82,39 +117,7 @@ class StockPriceFetcher {
       fileContent = formattedData;
     }
 
-    this.saveData(JSON.stringify(fileContent, null, 2));
-  }
-
-  /**
-   * Fetches stock prices for multiple stock symbols and formats the data.
-   *
-   * @returns {Promise<Record<string, StockData[]>>} A promise that resolves to an object containing stock data,
-   *          where the key is a timestamp and the value is an array of stock prices.
-   *
-   * @description
-   * - This helper method is responsible for making API calls for all stock symbols.
-   * - It filters out `null` values and returns structured data with a timestamp.
-   * - This method does **not** handle file operations.
-   */
-  private async _fetchAndFormatStockData(): Promise<
-    Record<string, StockData[]>
-  > {
-    const stockPromises = this._stockSymbols.map((symbol) =>
-      this.fetchStockPrice(symbol)
-    );
-    const stockData = await Promise.all(stockPromises);
-
-    return {
-      [this._timeTag]: stockData.filter((stock) => stock !== null),
-    };
-  }
-
-  /**
-   * Saves the structured data (fetched by fetchStockPrice) into a JSON file for future use.
-   * @param content json format which is stringified
-   */
-  private saveData(content: string) {
-    fs.writeFileSync(this._dataFilePath, content);
+    fs.writeFileSync(this._dataFilePath, JSON.stringify(fileContent, null, 2));
   }
 }
 
