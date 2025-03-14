@@ -1,5 +1,6 @@
 import axios from "axios";
 import fs from "fs";
+import { API_KEY, STOCK_SYMBOLS, TIME_TAG, DATA_FILE_PATH } from "../constants";
 
 interface StockData {
   "company name": string;
@@ -7,26 +8,30 @@ interface StockData {
 }
 
 class StockPriceFetcher {
+
+  private static _instance: StockPriceFetcher | null = null;
   private _apiKey: string;
   private _stockSymbols: string[];
   private _timeTag: string;
   private _dataFilePath: string;
 
-  constructor(
-    apiKey: string,
-    stockSymbols: string[],
-    timeTag: string,
-    dataFilePath: string
-  ) {
-    this._apiKey = apiKey;
-    this._stockSymbols = stockSymbols;
-    this._timeTag = timeTag;
-    this._dataFilePath = dataFilePath;
+  private constructor() {
+    this._apiKey = API_KEY;
+    this._stockSymbols = STOCK_SYMBOLS;
+    this._timeTag = TIME_TAG;
+    this._dataFilePath = DATA_FILE_PATH;
   }
 
-  async fetchAndSaveData(): Promise<void> {
+  public static getInstance() {
+    if(!StockPriceFetcher._instance) {
+      StockPriceFetcher._instance = new StockPriceFetcher();
+    }
+    return StockPriceFetcher._instance;
+  }
+
+  public async fetchAndSaveData(): Promise<void> {
     const formattedData = await this._fetchAndFormatStockData();
-    this._SaveStockPrices(formattedData);
+    this._saveStockPrices(formattedData);
   }
 
   /**
@@ -98,7 +103,7 @@ class StockPriceFetcher {
    * - Saves the updated stock data back to the file.
    * - Logs an error if reading/parsing the JSON file fails.
    */
-  private async _SaveStockPrices(
+  private async _saveStockPrices(
     formattedData: Record<string, StockData[]>
   ): Promise<void> {
     let fileContent: Record<string, StockData[]> = {};
