@@ -1,3 +1,9 @@
-import StockPriceFetcher from "./utils/stockPriceFetcher";
+import express, { Request, Response } from 'express';
+import router from './router';
 
-StockPriceFetcher.getInstance().fetchAndSaveData();
+const app = express();
+app.use(router);
+
+app.listen(7001, () => {
+    console.log('server is running');
+});
