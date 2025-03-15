@@ -13,8 +13,12 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
-    "dev": "ts-node ./src/index.ts",
-    "build": "tsc"
+    "dev:build": "tsc -w",
+    "dev:start": "nodemon node ./build/index.js",
+    "dev": "tsc && concurrently npm:dev:*"
+  },
+  "nodemonConfig": {
+    "ignore": ["data/*"]
   },
   "keywords": [],
   "author": "",
