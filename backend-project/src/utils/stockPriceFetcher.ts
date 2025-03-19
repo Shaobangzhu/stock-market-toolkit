@@ -1,6 +1,6 @@
 import axios from "axios";
 import fs from "fs";
-import { API_KEY, STOCK_SYMBOLS, TIME_TAG, DATA_FILE_PATH } from "../constants";
+import { API_KEY, STOCK_SYMBOLS, TIME_TAG, DATA_FILE_PATH } from "./constants";
 
 // Interface defining the structure of stock data
 interface StockData {
