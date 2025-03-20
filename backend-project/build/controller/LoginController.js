@@ -10,16 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
-function controller(target) {
-    for (var key in target.prototype) {
-        console.log(Reflect.getMetadata('path', target.prototype, key));
-    }
-}
-function get(path) {
-    return function (target, key) {
-        Reflect.defineMetadata('path', path, target, key);
-    };
-}
+var decorator_1 = require("./decorator");
 var LoginController = /** @class */ (function () {
     function LoginController() {
     }
@@ -35,19 +26,19 @@ var LoginController = /** @class */ (function () {
         }
     };
     __decorate([
-        get('/login'),
+        (0, decorator_1.get)('/login'),
         __metadata("design:type", Function),
         __metadata("design:paramtypes", []),
         __metadata("design:returntype", void 0)
     ], LoginController.prototype, "login", null);
     __decorate([
-        get('/'),
+        (0, decorator_1.get)('/'),
         __metadata("design:type", Function),
         __metadata("design:paramtypes", [Object, Object]),
         __metadata("design:returntype", void 0)
     ], LoginController.prototype, "home", null);
     LoginController = __decorate([
-        controller
+        decorator_1.controller
     ], LoginController);
     return LoginController;
 }());
