@@ -12,15 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.StockDataController = void 0;
 require("reflect-metadata");
-var decorator_1 = require("./decorator");
+var decorator_1 = require("../decorator");
 var util_1 = require("../utils/util");
 var stockPriceFetcher_1 = __importDefault(require("../utils/stockPriceFetcher"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var constants_1 = require("../utils/constants");
 var checkLogin = function (req, res, next) {
-    var isLogin = req.session ? req.session.login : false;
+    var isLogin = !!(req.session ? req.session.login : false);
     if (isLogin) {
         next();
     }
@@ -60,7 +61,8 @@ var StockDataController = /** @class */ (function () {
         __metadata("design:returntype", void 0)
     ], StockDataController.prototype, "showData", null);
     StockDataController = __decorate([
-        decorator_1.controller
+        (0, decorator_1.controller)("/")
     ], StockDataController);
     return StockDataController;
 }());
+exports.StockDataController = StockDataController;

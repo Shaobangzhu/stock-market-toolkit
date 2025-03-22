@@ -13,8 +13,8 @@ interface RequestWithBody extends Request {
   };
 }
 
-const checkLogin = (req: Request, res: Response, next: NextFunction) => {
-  const isLogin = req.session ? req.session.login : false;
+const checkLogin = (req: Request, res: Response, next: NextFunction): void => {
+  const isLogin = !!(req.session ? req.session.login : false);
   if (isLogin) {
     next();
   } else {
@@ -22,18 +22,18 @@ const checkLogin = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-@controller
-class StockDataController {
+@controller("/")
+export class StockDataController {
   @get("/getData")
   @use(checkLogin)
-  getData(req: RequestWithBody, res: Response) {
+  getData(req: RequestWithBody, res: Response): void {
     StockPriceFetcher.getInstance().fetchAndSaveData();
     res.json(getResponseData(true));
   }
 
   @get("/showData")
   @use(checkLogin)
-  showData(req: RequestWithBody, res: Response) {
+  showData(req: RequestWithBody, res: Response): void {
     try {
         const position = path.resolve(__dirname, DATA_FILE_PATH);
         const result = fs.readFileSync(position, "utf8");
