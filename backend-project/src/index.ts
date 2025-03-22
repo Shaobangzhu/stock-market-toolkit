@@ -1,7 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cookieSession from 'cookie-session';
-import './controller/LoginController';
+import './controller/login-controller';
+import './controller/stock-data-controller';
 import { router } from './controller/decorator';
 
 const app = express();
