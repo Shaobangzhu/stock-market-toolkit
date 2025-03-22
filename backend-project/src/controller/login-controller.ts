@@ -1,13 +1,8 @@
 import "reflect-metadata";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { controller, get, post } from "../decorator";
 import { getResponseData } from "../utils/util";
-
-interface RequestWithBody extends Request {
-  body: {
-    [key: string]: string | undefined;
-  };
-}
+import { RequestWithBody } from "../interfaces/request-with-body";
 
 @controller("/")
 export class LoginController {

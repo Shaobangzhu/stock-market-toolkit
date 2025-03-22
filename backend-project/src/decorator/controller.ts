@@ -1,6 +1,6 @@
 import router from '../router';
 import { RequestHandler } from 'express';
-import { Methods } from './methods';
+import { Methods } from '../enums/methods';
 
 export function controller(root: string) {
     return function (target: new (...args: any[]) => any) {

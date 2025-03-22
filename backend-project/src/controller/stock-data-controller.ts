@@ -6,12 +6,7 @@ import StockPriceFetcher from "../utils/stockPriceFetcher";
 import fs from "fs";
 import path from "path";
 import { DATA_FILE_PATH } from "../utils/constants";
-
-interface RequestWithBody extends Request {
-  body: {
-    [key: string]: string | undefined;
-  };
-}
+import { RequestWithBody } from "../interfaces/request-with-body"; 
 
 const checkLogin = (req: Request, res: Response, next: NextFunction): void => {
   const isLogin = !!(req.session ? req.session.login : false);

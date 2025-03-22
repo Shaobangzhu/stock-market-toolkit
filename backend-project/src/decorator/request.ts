@@ -1,5 +1,5 @@
 import { LoginController, StockDataController } from "../controller";
-import { Methods } from './methods';
+import { Methods } from '../enums/methods';
 
 function getRequestDecorator(type: Methods) {
     return function (path: string) {
