@@ -1,10 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.post = exports.get = exports.router = void 0;
+exports.post = exports.get = void 0;
 exports.controller = controller;
 exports.use = use;
-var express_1 = require("express");
-exports.router = (0, express_1.Router)();
+var router_1 = __importDefault(require("../router"));
 var Method;
 (function (Method) {
     Method["get"] = "get";
@@ -18,10 +20,10 @@ function controller(target) {
         var middleware = Reflect.getMetadata('middleware', target.prototype, key);
         if (path && method && handler) {
             if (middleware) {
-                exports.router[method](path, middleware, handler);
+                router_1.default[method](path, middleware, handler);
             }
             else {
-                exports.router[method](path, handler);
+                router_1.default[method](path, handler);
             }
         }
     }

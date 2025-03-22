@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { Request, Response, NextFunction } from "express";
-import { controller, get, use } from "./decorator";
+import { controller, use, get } from "../decorator";
 import { getResponseData } from "../utils/util";
 import StockPriceFetcher from "../utils/stockPriceFetcher";
 import fs from "fs";
