@@ -4,12 +4,20 @@ import { controller, get, post } from "../decorator";
 import { getResponseData } from "../utils/util";
 import { RequestWithBody } from "../interfaces/request-with-body";
 
+/**
+ * This class is an Express controller using decorators (@controller, @post, @get) to register routes.
+ * It handles login, logout, and the home page.
+ * The session-based login logic is basic (with hardcoded password "123").
+ * Responses use a utility function to maintain a consistent format.
+ */
 @controller("/")
 export class LoginController {
+  // Private static helper to check if user is logged in
   private static _isLogin(req: RequestWithBody): boolean {
     return !!(req.session ? req.session.login : false);
   }
 
+  // Route handler for POST /login
   @post("/login")
   login(req: RequestWithBody, res: Response): void {
     const isLogin = LoginController._isLogin(req);
@@ -30,6 +38,7 @@ export class LoginController {
     }
   }
 
+  // Route handler for GET /logout
   @get("/logout")
   logout(req: RequestWithBody, res: Response): void {
     if (req.session) {
@@ -38,6 +47,7 @@ export class LoginController {
     res.json(getResponseData(true));
   }
 
+  // Route handler for GET /
   @get("/")
   home(req: RequestWithBody, res: Response): void {
     const isLogin = LoginController._isLogin(req);
