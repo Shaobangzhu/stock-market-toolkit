@@ -1,6 +1,7 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 import { Request, Response } from "express";
-import { controller, get } from './decorator';
+import { controller, get, post } from "./decorator";
+import { getResponseData } from "../utils/util";
 
 interface RequestWithBody extends Request {
   body: {
@@ -10,13 +11,35 @@ interface RequestWithBody extends Request {
 
 @controller
 class LoginController {
+  @post("/login")
+  login(req: RequestWithBody, res: Response) {
+    const isLogin = req.session ? req.session.login : false;
 
-  @get('/login')
-  login() {
-
+    if (isLogin) {
+      res.json(getResponseData(false, "User Already Logged In."));
+    } else {
+      if (req.body.password === "123" && req.session) {
+        if (req.session) {
+          req.session.login = true;
+          res.json(getResponseData(true));
+        } else {
+          res.json(getResponseData(false, "Log In Failure!"));
+        }
+      } else {
+        res.json(getResponseData(false, "Log In Failure!"));
+      }
+    }
   }
 
-  @get('/')
+  @get("/logout")
+  logout(req: RequestWithBody, res: Response) {
+    if (req.session) {
+      req.session.login = undefined;
+    }
+    res.json(getResponseData(true));
+  }
+
+  @get("/")
   home(req: RequestWithBody, res: Response) {
     const isLogin = req.session ? req.session.login : false;
     if (isLogin) {

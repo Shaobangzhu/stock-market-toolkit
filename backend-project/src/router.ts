@@ -21,32 +21,8 @@ const checkLogin = (req: Request, res: Response, next: NextFunction) => {
 
 const router = Router();
 
-router.get("/", () => {});
-
-router.get("/logout", (req: RequestWithBody, res: Response) => {
-  if (req.session) {
-    req.session.login = undefined;
-  }
-  res.json(getResponseData(true));
-});
-
 router.post("/login", (req: RequestWithBody, res: Response) => {
-  const isLogin = req.session ? req.session.login : false;
-
-  if (isLogin) {
-    res.json(getResponseData(false, "User Already Logged In."));
-  } else {
-    if (req.body.password === "123" && req.session) {
-      if (req.session) {
-        req.session.login = true;
-        res.json(getResponseData(true));
-      } else {
-        res.json(getResponseData(false, "Log In Failure!"));
-      }
-    } else {
-        res.json(getResponseData(false, "Log In Failure!"));
-    }
-  }
+  
 });
 
 router.get("/getData", checkLogin, (req: RequestWithBody, res: Response) => {

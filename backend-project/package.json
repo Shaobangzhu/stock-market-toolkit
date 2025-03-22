@@ -21,8 +21,7 @@
   "scripts": {
     "dev:build": "tsc",
     "dev:start": "nodemon node ./build/index.js",
-    "dev": "tsc && concurrently npm:dev:*",
-    "test": "tsc && node ./build/controller/LoginController.js"
+    "dev": "tsc && concurrently npm:dev:*"
   },
   "nodemonConfig": {
     "ignore": [
