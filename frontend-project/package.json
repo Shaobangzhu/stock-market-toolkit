@@ -35,6 +35,7 @@
     ]
   },
   "devDependencies": {
-    "antd": "^5.24.4"
+    "antd": "^5.24.4",
+    "react-router-dom": "^7.4.0"
   }
 }
