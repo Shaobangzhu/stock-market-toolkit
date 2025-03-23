@@ -1,6 +1,6 @@
 import React from "react";
 import { HashRouter, Routes, Route } from 'react-router-dom';
-import LoginPage from './Views/Login';
+import LoginPage from './Views/Login/index.tsx';
 
 const App: React.FC = () => {
 
