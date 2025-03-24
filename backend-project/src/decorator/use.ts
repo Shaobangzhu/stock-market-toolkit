@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { RequestHandler } from 'express';
 import { LoginController, StockDataController } from "../controller";
 

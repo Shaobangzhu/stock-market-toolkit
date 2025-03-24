@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.use = use;
+require("reflect-metadata");
 /**
  * Middleware decorator to attach a middleware function to a route handler method.
  *

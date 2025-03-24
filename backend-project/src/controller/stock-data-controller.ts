@@ -22,7 +22,7 @@ const checkLogin = (req: Request, res: Response, next: NextFunction): void => {
  * getData(): Fetches stock price data and saves it to disk.
  * showData(): Reads and returns saved stock data from a file.
  */
-@controller("/")
+@controller("/api")
 export class StockDataController {
 
   // GET /getData

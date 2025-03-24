@@ -70,7 +70,7 @@ var StockDataController = /** @class */ (function () {
         __metadata("design:returntype", void 0)
     ], StockDataController.prototype, "showData", null);
     StockDataController = __decorate([
-        (0, decorator_1.controller)("/")
+        (0, decorator_1.controller)("/api")
     ], StockDataController);
     return StockDataController;
 }());

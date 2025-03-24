@@ -1,5 +1,4 @@
 import express from "express";
-import bodyParser from "body-parser";
 import cookieSession from "cookie-session";
 import "./controller/login-controller";
 import "./controller/stock-data-controller";
@@ -7,9 +6,7 @@ import router from "./router";
 
 // Create a new Express application
 const app = express();
-
-// Middleware to parse form data from POST requests (e.g., login form)
-app.use(bodyParser.urlencoded({ extended: false }));
+const port = 7001;
 
 // Middleware to enable cookie-based sessions
 app.use(
@@ -24,6 +21,6 @@ app.use(
 app.use(router);
 
 // Start the Express server on port 7001
-app.listen(7001, () => {
-  console.log("server is running");
+app.listen(port, () => {
+  console.log(`App listening on port ${port}`);
 });
