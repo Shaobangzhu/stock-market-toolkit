@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Button, Form, Input, message } from "antd";
@@ -32,9 +32,12 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  if (isLogin) {
-    navigate("/");
-  }
+  // ⛳ navigate after login success
+  useEffect(() => {
+    if (isLogin) {
+      navigate("/");
+    }
+  }, [isLogin, navigate]);
 
   return (
     <div className="login-page">
@@ -44,7 +47,7 @@ const LoginPage: React.FC = () => {
           rules={[{ required: true, message: "Please input your Password!" }]}
         >
           <Input
-            prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+            prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
             type="password"
             placeholder="Password"
           />

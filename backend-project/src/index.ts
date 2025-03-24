@@ -3,6 +3,7 @@ import cookieSession from "cookie-session";
 import "./controller/login-controller";
 import "./controller/stock-data-controller";
 import router from "./router";
+import bodyParser from 'body-parser';
 
 // Create a new Express application
 const app = express();
@@ -16,6 +17,9 @@ app.use(
     maxAge: 24 * 60 * 60 * 1000, // Cookie/session expiration time: 1 day
   })
 );
+
+// For parsing application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // Use the router that contains all registered controller routes
 app.use(router);

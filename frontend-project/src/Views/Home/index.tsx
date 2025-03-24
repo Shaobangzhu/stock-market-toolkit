@@ -100,7 +100,9 @@ const Home: React.FC = () => {
       })
     );
     return {
-      title: { text: "Stock Prices for Company in My Watch List" },
+      title: {
+        text: "Stock Prices for Company in My Watch List",
+      },
       tooltip: { trigger: "axis" },
       legend: { data: companyNames },
       grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
@@ -114,10 +116,16 @@ const Home: React.FC = () => {
   return (
     <div className="home-page">
       <div className="buttons">
-        <Button type="primary" style={{ marginLeft: "5px" }} onClick={handleGetDataClick}>
+        <Button
+          type="primary"
+          style={{ marginLeft: "10px" }}
+          onClick={handleGetDataClick}
+        >
           Get Data
         </Button>
-        <Button type="primary" onClick={handleLogoutClick}>Log Out</Button>
+        <Button type="primary" onClick={handleLogoutClick}>
+          Log Out
+        </Button>
       </div>
       <ReactEcharts option={getOption()} />
     </div>
