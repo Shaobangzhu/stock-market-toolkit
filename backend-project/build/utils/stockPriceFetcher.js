@@ -121,7 +121,7 @@ var StockPriceFetcher = /** @class */ (function () {
                         }
                         // Return formatted stock data
                         return [2 /*return*/, {
-                                "company name": symbol,
+                                company_name: symbol,
                                 price: parseFloat(data["05. price"]),
                             }];
                     case 2:

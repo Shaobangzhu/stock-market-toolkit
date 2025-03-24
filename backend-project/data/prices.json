@@ -1,38 +1,56 @@
 {
   "1742021571950": [
     {
-      "company name": "U",
+      "company_name": "U",
       "price": 20.77
     },
     {
-      "company name": "PLTR",
+      "company_name": "PLTR",
       "price": 86.24
     },
     {
-      "company name": "UBER",
+      "company_name": "UBER",
       "price": 71.55
     },
     {
-      "company name": "SOFI",
+      "company_name": "SOFI",
       "price": 12.09
     }
   ],
   "1742609242145": [
     {
-      "company name": "U",
+      "company_name": "U",
       "price": 21.55
     },
     {
-      "company name": "PLTR",
+      "company_name": "PLTR",
       "price": 90.96
     },
     {
-      "company name": "UBER",
+      "company_name": "UBER",
       "price": 75.84
     },
     {
-      "company name": "SOFI",
+      "company_name": "SOFI",
       "price": 12.87
+    }
+  ],
+  "1742793851736": [
+    {
+      "company_name": "U",
+      "price": 21.91
+    },
+    {
+      "company_name": "PLTR",
+      "price": 93.85
+    },
+    {
+      "company_name": "UBER",
+      "price": 76.95
+    },
+    {
+      "company_name": "SOFI",
+      "price": 13.34
     }
   ]
 }

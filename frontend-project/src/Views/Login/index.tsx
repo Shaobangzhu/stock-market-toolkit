@@ -1,20 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { Button, Form, Input, message } from "antd";
 import { LockOutlined } from "@ant-design/icons";
-import { Button, Form, Input } from "antd";
 import "./style.css";
 
 const LoginPage: React.FC = () => {
-  const onFinish = (values: any) => {
-    console.log("Received values of form: ", values);
+  const [isLogin, setIsLogin] = useState(false);
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      const formData = new URLSearchParams();
+      formData.append('password', values.password);
+
+      const res = await axios.post('/api/login', formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      if (res.data?.data) {
+        setIsLogin(true);
+      } else {
+        message.error('Log In Failure!');
+      }
+    } catch (error) {
+      message.error('Validation failed or request error.');
+    }
   };
+
+  if (isLogin) {
+    navigate('/');
+  }
 
   return (
     <div className="login-page">
       <Form
-        name="login"
+        className="login-form"
         initialValues={{ remember: true }}
         style={{ maxWidth: 360 }}
-        onFinish={onFinish}
+        onFinish={handleSubmit}
       >
         <Form.Item
           name="password"

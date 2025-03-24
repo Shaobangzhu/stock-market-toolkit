@@ -13,13 +13,21 @@ exports.LoginController = void 0;
 require("reflect-metadata");
 var decorator_1 = require("../decorator");
 var util_1 = require("../utils/util");
+/**
+ * This class is an Express controller using decorators (@controller, @post, @get) to register routes.
+ * It handles login, logout, and the home page.
+ * The session-based login logic is basic (with hardcoded password "123").
+ * Responses use a utility function to maintain a consistent format.
+ */
 var LoginController = /** @class */ (function () {
     function LoginController() {
     }
     LoginController_1 = LoginController;
+    // Private static helper to check if user is logged in
     LoginController._isLogin = function (req) {
         return !!(req.session ? req.session.login : false);
     };
+    // Route handler for POST /login
     LoginController.prototype.login = function (req, res) {
         var isLogin = LoginController_1._isLogin(req);
         if (isLogin) {
@@ -40,12 +48,14 @@ var LoginController = /** @class */ (function () {
             }
         }
     };
+    // Route handler for GET /logout
     LoginController.prototype.logout = function (req, res) {
         if (req.session) {
             req.session.login = undefined;
         }
         res.json((0, util_1.getResponseData)(true));
     };
+    // Route handler for GET /
     LoginController.prototype.home = function (req, res) {
         var isLogin = LoginController_1._isLogin(req);
         if (isLogin) {

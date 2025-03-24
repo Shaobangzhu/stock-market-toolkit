@@ -4,7 +4,7 @@ import { API_KEY, STOCK_SYMBOLS, TIME_TAG, DATA_FILE_PATH } from "./constants";
 
 // Interface defining the structure of stock data
 interface StockData {
-  "company name": string;
+  company_name: string;
   price: number;
 }
 
@@ -76,7 +76,7 @@ class StockPriceFetcher {
 
       // Return formatted stock data
       return {
-        "company name": symbol,
+        company_name: symbol,
         price: parseFloat(data["05. price"]),
       };
     } catch (error) {

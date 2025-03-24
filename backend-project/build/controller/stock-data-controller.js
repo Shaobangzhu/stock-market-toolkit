@@ -20,6 +20,7 @@ var stockPriceFetcher_1 = __importDefault(require("../utils/stockPriceFetcher"))
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var constants_1 = require("../utils/constants");
+// Middleware to check if the user is logged in (based on session)
 var checkLogin = function (req, res, next) {
     var isLogin = !!(req.session ? req.session.login : false);
     if (isLogin) {
@@ -29,13 +30,21 @@ var checkLogin = function (req, res, next) {
         res.json((0, util_1.getResponseData)(null, 'Please Log In First!'));
     }
 };
+/**
+ * getData(): Fetches stock price data and saves it to disk.
+ * showData(): Reads and returns saved stock data from a file.
+ */
 var StockDataController = /** @class */ (function () {
     function StockDataController() {
     }
+    // GET /getData
+    // Middleware @use(checkLogin) ensures only logged-in users can access
     StockDataController.prototype.getData = function (req, res) {
         stockPriceFetcher_1.default.getInstance().fetchAndSaveData();
         res.json((0, util_1.getResponseData)(true));
     };
+    // GET /showData
+    // Middleware @use(checkLogin) ensures only logged-in users can access
     StockDataController.prototype.showData = function (req, res) {
         try {
             var position = path_1.default.resolve(__dirname, constants_1.DATA_FILE_PATH);
