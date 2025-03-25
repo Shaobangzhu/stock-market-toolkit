@@ -99,9 +99,9 @@ This approach works safely across:
 ---
 
 ## 📌 TODO
-- [ ] Store data in a NoSQL database (e.g., MongoDB)
 - [ ] Add user registration
 - [ ] Save user watchlists
+- [ ] Store data in a NoSQL database (e.g., MongoDB)
 - [ ] Implement trading strategy editor
 
 
