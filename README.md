@@ -99,11 +99,11 @@ This approach works safely across:
 ---
 
 ## 📌 TODO
-- [ ] Add user registration
-- [ ] Connect to live stock price APIs
-- [ ] Implement trading strategy editor
-- [ ] Save user watchlists
 - [ ] Store data in a NoSQL database (e.g., MongoDB)
+- [ ] Add user registration
+- [ ] Save user watchlists
+- [ ] Implement trading strategy editor
+
 
 ---
 
