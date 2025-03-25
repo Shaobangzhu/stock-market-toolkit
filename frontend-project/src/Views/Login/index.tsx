@@ -6,28 +6,37 @@ import { LockOutlined } from "@ant-design/icons";
 import "./style.css";
 
 const LoginPage: React.FC = () => {
+  // Track login state
   const [isLogin, setIsLogin] = useState(false);
+  // Ant Design form instance for validation and form control
   const [form] = Form.useForm();
+  // React Router hook for redirecting after login
   const navigate = useNavigate();
 
+  // Called when user submits the form
   const handleSubmit = async () => {
     try {
+      // Validate input fields (especially the password)
       const values = await form.validateFields();
+      // Format data as URL-encoded form data
       const formData = new URLSearchParams();
       formData.append("password", values.password);
 
+      // Send login request to backend
       const res = await axios.post("/api/login", formData, {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/x-www-form-urlencoded", // Matches how backend expects it
         },
       });
 
+      // If backend returns success, mark user as logged in
       if (res.data?.data) {
         setIsLogin(true);
       } else {
-        message.error("Log In Failure!");
+        message.error("Log In Failure!"); // Server responded with failure
       }
     } catch (error) {
+      // Catch validation or network errors
       message.error("Validation failed or request error.");
     }
   };
