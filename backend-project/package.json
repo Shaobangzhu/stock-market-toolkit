@@ -19,7 +19,7 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
-    "dev:build": "tsc",
+    "dev:build": "tsc -w",
     "dev:start": "nodemon node ./build/index.js",
     "dev": "tsc && concurrently npm:dev:*"
   },
