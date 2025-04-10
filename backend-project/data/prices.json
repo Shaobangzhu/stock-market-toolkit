@@ -232,5 +232,23 @@
       "company_name": "SOFI",
       "price": 9.5
     }
+  ],
+  "1744244107851": [
+    {
+      "company_name": "U",
+      "price": 19.99
+    },
+    {
+      "company_name": "PLTR",
+      "price": 92.01
+    },
+    {
+      "company_name": "UBER",
+      "price": 72.68
+    },
+    {
+      "company_name": "SOFI",
+      "price": 11.39
+    }
   ]
 }
