@@ -24,8 +24,37 @@ daytrade-framework/
 
 ---
 
-## 📸 Screenshots
-![Architecture Diagram](./assets/screenshot.jpg)
+## 📸 App Screenshots
+
+Below are the key user interfaces of the **Money Piranha** web app:
+
+---
+
+### 📝 Sign Up
+Create a new account securely with email and password.
+
+![Sign Up Screen](./assets/sign_up.png)
+
+---
+
+### 🔐 Log In
+Access your personalized stock dashboard.
+
+![Log In Screen](./assets/login.png)
+
+---
+
+### 📋 Watchlist Dashboard
+View and manage your stock watchlist with real-time price and change data.
+
+![Watchlist Dashboard](./assets/dashboard.png)
+
+---
+
+### 📈 Stock Detail Page
+Analyze stock trends and chip distribution across time ranges.
+
+![Stock Detail](./assets/stock_detail.png)
 
 ---
 
