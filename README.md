@@ -1,13 +1,13 @@
-# DayTrade Framework 📈
+# Money Piranha 📈
 
-A full-stack day trading framework for experimenting with stock market strategies in a modular, scalable, and UI-driven environment. Built with Express, TypeScript, React, and ECharts.
+A full-stack stock market toolkit for experimenting with stock market strategies in a modular, scalable, and UI-driven environment. Built with Express, TypeScript, React, and ECharts.
 
 ---
 
 ## 🗂 Project Structure
 
 ```
-daytrade-framework/
+stock-market-toolkit/
 ├── backend-project/    # Express backend with session-based auth and route decorators
 └── frontend-project/   # React frontend with Ant Design and ECharts
 ```
