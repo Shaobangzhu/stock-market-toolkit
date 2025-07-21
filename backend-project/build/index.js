@@ -9,6 +9,9 @@ require("./controller/login-controller");
 require("./controller/stock-data-controller");
 var router_1 = __importDefault(require("./router"));
 var body_parser_1 = __importDefault(require("body-parser"));
+var dotenv_1 = __importDefault(require("dotenv"));
+// 在代码中引入dotenv的值, 这样， 任何process.env.XYZ的调用都可以自动读取.env中的值
+dotenv_1.default.config();
 // Create a new Express application
 var app = (0, express_1.default)();
 var port = 7001;
