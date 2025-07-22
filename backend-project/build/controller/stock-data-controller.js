@@ -56,6 +56,7 @@ var stockPriceFetcher_1 = __importDefault(require("../utils/stockPriceFetcher"))
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var constants_1 = require("../utils/constants");
+var singleStockHourlyVolumeFetcher_1 = require("../utils/singleStockHourlyVolumeFetcher");
 // Middleware to check if the user is logged in (based on session)
 var checkLogin = function (req, res, next) {
     var isLogin = !!(req.session ? req.session.login : false);
@@ -93,10 +94,35 @@ var StockDataController = /** @class */ (function () {
     };
     StockDataController.prototype.getSingleStockVolume = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
+            var result, e_1;
             return __generator(this, function (_a) {
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, (0, singleStockHourlyVolumeFetcher_1.singleStockHourlyVolumeFetcher)()];
+                    case 1:
+                        result = _a.sent();
+                        res.json((0, util_1.getResponseData)(result));
+                        return [3 /*break*/, 3];
+                    case 2:
+                        e_1 = _a.sent();
+                        console.error(e_1);
+                        res.json((0, util_1.getResponseData)(null, "Failed to fetch hourly volume data."));
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
             });
         });
+    };
+    StockDataController.prototype.showSingleStockVolume = function (req, res) {
+        try {
+            var position = path_1.default.resolve(__dirname, constants_1.SINGLE_STOCK_VOLUME_DATA_FILE_PATH);
+            var result = fs_1.default.readFileSync(position, "utf-8");
+            res.json((0, util_1.getResponseData)(JSON.parse(result)));
+        }
+        catch (e) {
+            res.json((0, util_1.getResponseData)(false, "Volume Data NOT Exist!"));
+        }
     };
     __decorate([
         (0, decorator_1.get)("/getData"),
@@ -119,6 +145,13 @@ var StockDataController = /** @class */ (function () {
         __metadata("design:paramtypes", [Object, Object]),
         __metadata("design:returntype", Promise)
     ], StockDataController.prototype, "getSingleStockVolume", null);
+    __decorate([
+        (0, decorator_1.get)("/showSingleStockVolume"),
+        (0, decorator_1.use)(checkLogin),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [Object, Object]),
+        __metadata("design:returntype", void 0)
+    ], StockDataController.prototype, "showSingleStockVolume", null);
     StockDataController = __decorate([
         (0, decorator_1.controller)("/api")
     ], StockDataController);
