@@ -63,10 +63,10 @@ var StockPriceFetcher = /** @class */ (function () {
      * Initializes the required configuration values from constants.
      */
     function StockPriceFetcher() {
-        this._apiKey = constants_1.API_KEY;
+        this._apiKey = process.env.ALPHA_VANTAGE_API_KEY;
         this._stockSymbols = constants_1.STOCK_SYMBOLS;
         this._timeTag = constants_1.TIME_TAG;
-        this._dataFilePath = constants_1.DATA_FILE_PATH;
+        this._dataFilePath = constants_1.STOCK_PRICE_DATA_FILE_PATH;
     }
     /**
      * Returns the singleton instance of `StockPriceFetcher`.

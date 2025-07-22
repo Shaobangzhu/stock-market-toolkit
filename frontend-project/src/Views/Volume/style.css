@@ -1,0 +1,38 @@
+.volume-page {
+  padding: 30px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.buttons .ant-btn {
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.buttons .ant-btn-primary {
+  background-color: #1677ff;
+  border-color: #1677ff;
+}
+
+.buttons .ant-btn-primary:hover {
+  background-color: #4096ff;
+  border-color: #4096ff;
+}
+
+.buttons .ant-select {
+  margin-right: 15px;
+}
+
+.volume-chart {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}

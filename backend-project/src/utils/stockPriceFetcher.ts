@@ -1,6 +1,6 @@
 import axios from "axios";
 import fs from "fs";
-import { API_KEY, STOCK_SYMBOLS, TIME_TAG, DATA_FILE_PATH } from "./constants";
+import { STOCK_SYMBOLS, TIME_TAG, STOCK_PRICE_DATA_FILE_PATH } from "./constants";
 
 // Interface defining the structure of stock data
 interface StockData {
@@ -17,7 +17,7 @@ class StockPriceFetcher {
   private static _instance: StockPriceFetcher | null = null;
 
   // Private instance variables for API credentials and file handling
-  private _apiKey: string;
+  private _apiKey: string | undefined;
   private _stockSymbols: string[];
   private _timeTag: string;
   private _dataFilePath: string;
@@ -27,10 +27,10 @@ class StockPriceFetcher {
    * Initializes the required configuration values from constants.
    */
   private constructor() {
-    this._apiKey = API_KEY;
+    this._apiKey = process.env.ALPHA_VANTAGE_API_KEY;
     this._stockSymbols = STOCK_SYMBOLS;
     this._timeTag = TIME_TAG;
-    this._dataFilePath = DATA_FILE_PATH;
+    this._dataFilePath = STOCK_PRICE_DATA_FILE_PATH;
   }
 
   /**

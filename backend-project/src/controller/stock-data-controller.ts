@@ -5,8 +5,9 @@ import { getResponseData } from "../utils/util";
 import StockPriceFetcher from "../utils/stockPriceFetcher";
 import fs from "fs";
 import path from "path";
-import { DATA_FILE_PATH } from "../utils/constants";
+import { SINGLE_STOCK_VOLUME_DATA_FILE_PATH, STOCK_PRICE_DATA_FILE_PATH } from "../utils/constants";
 import { RequestWithBody } from "../interfaces/request-with-body"; 
+import { singleStockHourlyVolumeFetcher } from "../utils/singleStockHourlyVolumeFetcher";
 
 // Middleware to check if the user is logged in (based on session)
 const checkLogin = (req: Request, res: Response, next: NextFunction): void => {
@@ -40,11 +41,35 @@ export class StockDataController {
   @use(checkLogin)
   showData(req: RequestWithBody, res: Response): void {
     try {
-        const position = path.resolve(__dirname, DATA_FILE_PATH);
+        const position = path.resolve(__dirname, STOCK_PRICE_DATA_FILE_PATH);
         const result = fs.readFileSync(position, "utf8");
         res.json(getResponseData(JSON.parse(result)));
       } catch (e) {
         res.json(getResponseData(false, "Data NOT Exist!"));
       }
+  }
+
+  @get("/getSingleStockVolume")
+  @use(checkLogin)
+  async getSingleStockVolume(req: RequestWithBody, res: Response): Promise<void> {
+    try {
+      const result = await singleStockHourlyVolumeFetcher();
+      res.json(getResponseData(result));
+    } catch (e) {
+      console.error(e);
+      res.json(getResponseData(null, "Failed to fetch hourly volume data."));
+    }
+  }
+
+  @get("/showSingleStockVolume")
+  @use(checkLogin)
+  showSingleStockVolume(req: RequestWithBody, res: Response): void {
+    try {
+      const position = path.resolve(__dirname, SINGLE_STOCK_VOLUME_DATA_FILE_PATH);
+      const result = fs.readFileSync(position, "utf-8");
+      res.json(getResponseData(JSON.parse(result)));
+    } catch (e) {
+      res.json(getResponseData(false, "Volume Data NOT Exist!"));
+    }
   }
 }

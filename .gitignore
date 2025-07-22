@@ -132,3 +132,5 @@ dist
 # production env
 /backend-project/build/*
 !/backend-project/build/.gitkeep
+
+**/.env
