@@ -4,6 +4,10 @@ import "./controller/login-controller";
 import "./controller/stock-data-controller";
 import router from "./router";
 import bodyParser from 'body-parser';
+import dotenv from 'dotenv';
+
+// 在代码中引入dotenv的值, 这样， 任何process.env.XYZ的调用都可以自动读取.env中的值
+dotenv.config();
 
 // Create a new Express application
 const app = express();
