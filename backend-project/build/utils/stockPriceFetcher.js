@@ -66,7 +66,7 @@ var StockPriceFetcher = /** @class */ (function () {
         this._apiKey = process.env.ALPHA_VANTAGE_API_KEY;
         this._stockSymbols = constants_1.STOCK_SYMBOLS;
         this._timeTag = constants_1.TIME_TAG;
-        this._dataFilePath = constants_1.DATA_FILE_PATH;
+        this._dataFilePath = constants_1.STOCK_PRICE_DATA_FILE_PATH;
     }
     /**
      * Returns the singleton instance of `StockPriceFetcher`.
