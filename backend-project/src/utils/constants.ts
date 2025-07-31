@@ -1,6 +1,6 @@
 import path from 'path';
 
-export const SINGLE_STOCK_SYMBOL = "OPEN";
+export const SINGLE_STOCK_SYMBOL = "FIG";
 
 export const STOCK_SYMBOLS = ["U", "PLTR", "UBER", "SOFI"];
 
