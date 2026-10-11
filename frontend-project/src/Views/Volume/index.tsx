@@ -98,7 +98,7 @@ const Volume: React.FC = () => {
 
     return {
       title: {
-        text: `${selectedDate} OPEN Intraday Volume & Price`,
+        text: `${selectedDate} Figma Intraday Volume & Price`,
       },
       tooltip: {
         trigger: "axis",

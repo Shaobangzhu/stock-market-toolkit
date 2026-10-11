@@ -133,4 +133,4 @@ dist
 /backend-project/build/*
 !/backend-project/build/.gitkeep
 
-**/.env
+# **/.env
