@@ -1,4 +1,12 @@
-# Money Piranha 📈
+# Stock Research Lab
+
+The Express backend has been refactored for local-only, single-user operation. See [backend setup and API](backend-project/README.md) and the [Phase 1 implementation record](docs/PHASE_1_BACKEND.md). From `backend-project/`, run `npm ci`, `npm run build`, then `npm start`; health is at `http://127.0.0.1:7001/api/health`.
+
+The frontend has not yet been modernized and still calls removed login and JSON-data APIs. Product requirements are in [PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md); the screenshots and historical README below describe the previous prototype, not currently supported features or setup.
+
+---
+
+# Historical Money Piranha prototype 📈
 
 A full-stack stock market toolkit for experimenting with stock market strategies in a modular, scalable, and UI-driven environment. Built with Express, TypeScript, React, and ECharts.
 

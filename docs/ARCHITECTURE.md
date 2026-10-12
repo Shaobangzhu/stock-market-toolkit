@@ -4,6 +4,8 @@ Audit date: 2026-10-11 (America/Los_Angeles). Repository: [Shaobangzhu/stock-mar
 
 Sections 1–3 describe observed implementation. Sections 4–9 are proposed implementation decisions, not claims that those systems already exist. [Product scope](PRODUCT_SCOPE.md) is authoritative for feature boundaries; [implementation plan](IMPLEMENTATION_PLAN.md) defines delivery gates.
 
+**Subsequent implementation:** the backend-only Phase 1 refactor is recorded in [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md). The audit findings below describe the original commit. Phase 1 uses the requested `src/routes/` and `src/middleware/` layout, keeps startup in `src/index.ts`, emits to ignored `dist/`, and exposes the explicitly requested `/api/health`; domain APIs and persistence remain future phases.
+
 ## 1. Actual current architecture
 
 ### Runtime, dependencies, and configuration
