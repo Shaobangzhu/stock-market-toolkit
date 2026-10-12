@@ -36,7 +36,7 @@ Use ordinary browser paths, not hash routing. A direct load or refresh of a stoc
 
 ### Historical price, volume, and entry-price intelligence
 
-- Tiingo supplies primary historical data; Twelve Data is an explicitly selected alternative. A provider failure must not silently combine incompatible series.
+- Tiingo is the sole market-price provider for the MVP, supplying historical daily OHLCV, adjusted prices and corporate actions where supported. Historical observations persist in PostgreSQL; cached records remain available during temporary outages. Failed requests must not overwrite valid cached data; show stale/unavailable states honestly. No automatic fallback provider is configured. Additional providers require a future scope decision and are outside the MVP.
 - Use daily bars initially. Latest daily close must be labeled as such, never presented as a live executable quote.
 - Support user-requested refreshes with progress and failure states. Keep prior successful data readable on failure.
 - Preserve raw and adjusted data and their provenance. Never compare values from different currencies or adjustment bases without an explicit conversion/method.
@@ -56,7 +56,8 @@ Use ordinary browser paths, not hash routing. A direct load or refresh of a stoc
 
 - Show whether backend-only provider credentials are configured, without returning their values. Edit secrets in the ignored local environment file initially; the UI does not store keys in browser storage or write environment files.
 - Persist nonsecret preference overrides only when the user saves them. Defaults come from code/environment and need no database rows.
-- Expose provider selection, data freshness, refresh history/status, and actionable connection errors. Connection tests are explicit actions.
+- Show exactly three external providers: Tiingo (prices/synchronization), SEC EDGAR (filings/fundamentals, companyfacts/submissions), and OpenAI (news discovery, bullish/bearish qualitative analysis and research reports). Expose data freshness, refresh history/status, and actionable connection errors. Connection tests are explicit actions.
+- Status concepts are Online, Not Configured, Rate Limited, Error, and Unknown. Configuration presence alone does not prove Online. Derive provider counts from actual configured or verified status records; never hardcode an Online count.
 - Provide local backup/restore instructions before routine use. Destructive reset/purge tools are not required for the first release and must never run automatically.
 
 ## Fresh database is mandatory

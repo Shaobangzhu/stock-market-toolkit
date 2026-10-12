@@ -54,9 +54,20 @@ This plan authorizes no implementation by itself. The current phase creates thos
 - Implement Tiingo identity/history normalization and explicit date-range refresh. Store daily raw/adjusted OHLCV, currency/timezone, provenance, split/dividend fields where supplied, and retrieval/revision metadata.
 - Build aligned price/volume charts from one provider/basis; sort dates explicitly, preserve gaps, and label latest daily close and data freshness. Requery after job completion.
 - Support overlapping imports and revised provider bars through deterministic upserts. Never convert missing data to zero or claim partial history is complete.
-- Add Twelve Data only after its current schema, subscription coverage, timezone, and adjustment semantics are verified. The user explicitly selects this alternative; no silent automatic failover or provider mixing.
+- Tiingo is the sole market-price provider. Keep persisted PostgreSQL prices readable during outages, preserve valid records on failed requests, and report stale/unavailable data. No automatic fallback provider is configured.
 
-**Exit gate:** adapter fixtures verify normalization, provider error bodies, 429/backoff, missing dates, invalid OHLCV, and adjustments; database tests verify idempotent overlap/revisions and atomic writes; UI covers pending/failed/interrupted/success states and post-refresh updates. Optional live checks use the user's own configured key and a user-selected stock, with no demo/seed stock. Verify a second provider remains separate in storage and chart selection.
+**Exit gate:** adapter fixtures verify normalization, provider error bodies, 429/backoff, missing dates, invalid OHLCV, and adjustments; database tests verify idempotent overlap/revisions and atomic writes; UI covers pending/failed/interrupted/success states and post-refresh updates. Optional live checks use the user's own configured key and a user-selected stock, with no demo/seed stock. Failed requests preserve the cached Tiingo series.
+
+### Prompt 05 - Documentation & Environment Cleanup
+
+This prompt milestone follows the Tiingo backend implementation. Prompt numbering is separate from the original architecture phases below; later prompt numbers and phase headings remain unchanged.
+
+- Align scope, architecture, setup and settings specifications around exactly three MVP providers: Tiingo for market prices, SEC EDGAR for filings/fundamentals and OpenAI for news/qualitative research.
+- Remove obsolete market-provider credentials and selection settings from the tracked template, ignored local environment and runtime validator. Preserve unrelated settings and credentials in place.
+- Retain the MarketDataProvider abstraction; preserve cached PostgreSQL prices on failures and report stale/unavailable data honestly. No market-data fallback or additional provider is part of the MVP.
+- Data & Settings derives counts from configured/verified status records, with Online, Not Configured, Rate Limited, Error and Unknown states. Never hardcode an Online count.
+
+**Exit gate:** current MVP documentation and templates contain only the approved providers; environment secrets remain ignored and preserved; configuration/startup and existing Tiingo regression checks pass. No provider feature, Docker or database changes.
 
 ### 5. Add SEC filings and contextual fundamentals
 
@@ -100,7 +111,7 @@ These are bounded uncertainties, not permission to expand the product beyond the
 | ID | Decision / evidence needed | Default proposal and blocking point |
 | --- | --- | --- |
 | U01 | Supported markets, instrument types, currency scope, duplicate symbols, renamed/delisted stocks. | US-listed equities, daily bars, listing currency; canonical symbol unique in this initial universe. Confirm before symbol/schema/provider work; multi-market support requires revisiting the route identity. |
-| U02 | Provider accounts, actual Tiingo/Twelve Data coverage, request quotas, permitted storage, adjustment semantics, and desired date range. | Tiingo primary, Twelve Data explicit alternative, no automatic fallback. Decide default/max lookback before phase 4. Twelve Data docs could not be reliably fetched in the audit. |
+| U02 | Tiingo account coverage, request quotas, permitted storage, adjustment semantics, and desired date range. | Tiingo is the sole MVP price provider, with no automatic fallback. Existing verified defaults and application coverage limits are recorded in TIINGO.md; live account entitlements remain unverified. |
 | U03 | Meaning of “entry-price intelligence”: valuation vs price-based method, formula, lookback, scenarios, user inputs, rounding, missing-data rules, and expected examples. | Do not invent a method. Blocks calculated entry prices in phase 6, not the empty shell/watchlist/history foundation. No backtesting or automated strategy execution implied. |
 | U04 | SEC forms, metric definitions, quarterly/annual/TTM selection, restatement/cutoff policy, and foreign-issuer support. | Start with selected US-company annual/quarterly filings, preserve original contexts. Confirm exact forms/concepts and cutoff behavior before phase 5 calculations. |
 | U05 | OpenAI model and account tool access, research horizon/template, maximum cost/token/tool budget, and whether user notes may be sent. | Responses API, cited news plus qualitative analysis, public selected evidence only, `store: false`; no automatic paid runs. Blocks phase 7 provider wiring. Existing `gpt-5-mini` example is not a verified selection. |

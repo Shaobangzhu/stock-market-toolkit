@@ -28,6 +28,8 @@ The frontend uses BrowserRouter with Vite's SPA fallback. Direct navigation work
 
 ## Project guidance
 
+The MVP has exactly three external providers: **Tiingo** for daily market prices and synchronization, **SEC EDGAR** for official filings and financial fundamentals, and **OpenAI** for news discovery and qualitative research. Tiingo is the sole price provider. Prices are cached in PostgreSQL and remain readable during outages; failures preserve valid records and report stale/unavailable data. There is no automatic market-data fallback. Additional providers are outside the MVP. See the implementation plan's **Prompt 05 - Documentation & Environment Cleanup** milestone.
+
 - [Product scope](docs/PRODUCT_SCOPE.md) and [architecture](docs/ARCHITECTURE.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Backend API and configuration](backend-project/README.md)

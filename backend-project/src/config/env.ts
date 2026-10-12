@@ -34,9 +34,6 @@ const databaseUrl = optionalText.refine((value) => {
   }
 }, 'Must be a local PostgreSQL connection URL');
 
-export const marketDataProviderSchema = z.enum(['tiingo', 'twelve_data']);
-export type MarketDataProvider = z.infer<typeof marketDataProviderSchema>;
-
 export const configSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   HOST: z.literal('127.0.0.1').default('127.0.0.1'),
@@ -49,9 +46,6 @@ export const configSchema = z.object({
   TIINGO_MAX_REQUESTS_PER_DAY: z.coerce.number().int().min(1).max(1000000).default(1000),
   TIINGO_MAX_SYMBOLS_PER_MONTH: z.coerce.number().int().min(1).max(1000000).default(500),
   TIINGO_MAX_BYTES_PER_MONTH: z.coerce.number().int().min(8388608).max(1000000000000).default(1000000000),
-  TWELVE_DATA_API_KEY: optionalText,
-  PRIMARY_MARKET_DATA_PROVIDER: marketDataProviderSchema.default('tiingo'),
-  FALLBACK_MARKET_DATA_PROVIDER: marketDataProviderSchema.default('twelve_data'),
   OPENAI_API_KEY: optionalText,
   OPENAI_MODEL: z.string().trim().min(1).max(128).default('gpt-5-mini'),
   SEC_EDGAR_USER_AGENT: optionalText.refine(
@@ -60,10 +54,7 @@ export const configSchema = z.object({
     'Must include a contact email and contain no control characters',
   ),
   SEC_EDGAR_MAX_RPS: z.coerce.number().int().min(1).max(10).default(2),
-}).refine(
-  (config) => config.PRIMARY_MARKET_DATA_PROVIDER !== config.FALLBACK_MARKET_DATA_PROVIDER,
-  { path: ['FALLBACK_MARKET_DATA_PROVIDER'], message: 'Must differ from the primary provider' },
-);
+});
 
 export type AppConfig = Readonly<z.infer<typeof configSchema>>;
 

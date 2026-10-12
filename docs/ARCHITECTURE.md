@@ -101,7 +101,7 @@ Express: request validation -> application services -> Prisma repositories
   |                             +-> local job runner      v
   |                                 + provider adapters  PostgreSQL
   |                                       |
-  + serves built Vite assets              +-> Tiingo / Twelve Data
+  + serves built Vite assets              +-> Tiingo
                                           +-> SEC EDGAR
                                           +-> OpenAI Responses API
 ```
@@ -124,7 +124,7 @@ backend-project/src/
   config/
   http/                 routes, schemas, errors, Host/Origin enforcement
   modules/              watchlist, stocks, market-data, filings, research, analysis, settings
-  providers/            tiingo, twelve-data, sec, openai adapters
+  providers/            tiingo, sec, openai adapters
   jobs/                 bounded local runner and recovery
   db/                   Prisma client and persistence helpers
 backend-project/prisma/ schema and schema-only migrations
@@ -199,9 +199,13 @@ Report and analysis snapshots preserve the values actually used, because future 
 
 ## 7. Provider and analysis boundaries
 
-**MarketDataProvider:** capabilities, identity resolution, and daily-bar retrieval return normalized DTOs and typed failures. Tiingo is the default; Twelve Data is an explicit alternative. Initial behavior does not auto-fail over. An alternative import requires user selection and records its provider. A chart/query selects a single provider series; gaps remain visible. Never splice providers to make a chart look complete. Tiingo documents both raw and split/dividend-adjusted prices and subsequent corrections, which is why refreshes must support revisions. [Tiingo EOD documentation](https://www.tiingo.com/documentation/end-of-day).
+**MarketDataProvider:** retain the existing abstraction for normalized identity, daily bars, latest EOD and typed failures. Tiingo is the sole market-price provider in the MVP. PostgreSQL stores historical observations; cached records remain readable during temporary Tiingo outages. Failed requests never overwrite valid cache, and the UI reports stale/unavailable data honestly. No automatic fallback provider is configured. Additional providers may be considered in the future but are outside the MVP. Gaps remain visible and raw/adjusted series stay separate. Tiingo documents raw and split/dividend-adjusted prices, corporate actions and subsequent corrections; refreshes support revisions. [Tiingo EOD documentation](https://www.tiingo.com/documentation/end-of-day).
 
-Store raw and adjusted values separately. Raw prices describe historical traded prices; adjusted series support comparable trend/return calculations. Entry-price comparisons require a documented, consistent basis and current-share interpretation. Do not assert equivalence between Twelve Data's adjustments and Tiingo's before fixture-based verification. Twelve Data's documentation pages could not be retrieved reliably during this audit; current endpoints, coverage, adjustment semantics, and account entitlements remain an explicit integration gate.
+Store raw and adjusted values separately. Raw prices describe historical traded prices; adjusted series support comparable trend/return calculations. Entry-price comparisons require a documented, consistent basis and current-share interpretation. Provider account coverage and adjustment semantics remain subject to the implemented validation and limitations in [TIINGO.md](TIINGO.md).
+
+**Data & Settings provider specification:** list exactly Tiingo, SEC EDGAR and OpenAI. Tiingo covers market prices and synchronization; SEC EDGAR covers official filings, financial fundamentals, companyfacts and submissions; OpenAI covers news discovery, bullish/bearish analysis and report generation. Expose Online, Not Configured, Rate Limited, Error and Unknown separately. Keys being present do not verify connectivity. Derive configured/verified counts from actual status records; do not hardcode an Online count. Quotas and troubleshooting are provider-specific; there is no market-provider selector or fallback configuration.
+
+**Database compatibility:** the Prisma enums and already-applied initial migration retain the obsolete `TWELVE_DATA` value as an inert schema artifact. No adapter or runtime selector uses it. Do not rewrite applied migrations; removing the enum requires a separately scoped schema migration. Historical audit references below/above are records of the old repository, not current MVP requirements.
 
 **SEC adapter:** backend-only access to submissions/companyfacts and allowlisted filing documents; identify the client with a real contact-bearing User-Agent. Use a shared conservative 2 requests/second limiter, caching, bounded retries and backoff. SEC documents a maximum of 10 requests/second and does not support browser CORS on `data.sec.gov`. [SEC access guidance](https://www.sec.gov/about/webmaster-frequently-asked-questions), [EDGAR APIs](https://www.sec.gov/search-filings/edgar-application-programming-interfaces). Resolve issuer CIK on demand; do not preload a symbol catalog into the database. Required filing forms and normalized metric mappings remain to be selected.
 

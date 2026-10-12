@@ -12,14 +12,12 @@ test('defaults allow startup without a database or any optional provider credent
   assert.equal(config.HOST, '127.0.0.1');
   assert.equal(config.PORT, 7001);
   assert.equal(config.FRONTEND_ORIGIN, 'http://localhost:5173');
-  assert.equal(config.PRIMARY_MARKET_DATA_PROVIDER, 'tiingo');
-  assert.equal(config.FALLBACK_MARKET_DATA_PROVIDER, 'twelve_data');
   assert.equal(config.SEC_EDGAR_MAX_RPS, 2);
   assert.equal(config.TIINGO_MAX_REQUESTS_PER_HOUR, 50);
   assert.equal(config.TIINGO_MAX_REQUESTS_PER_DAY, 1000);
   assert.equal(config.TIINGO_MAX_SYMBOLS_PER_MONTH, 500);
   assert.equal(config.TIINGO_MAX_BYTES_PER_MONTH, 1000000000);
-  for (const field of ['DATABASE_URL', 'TIINGO_API_KEY', 'TWELVE_DATA_API_KEY', 'OPENAI_API_KEY', 'SEC_EDGAR_USER_AGENT']) {
+  for (const field of ['DATABASE_URL', 'TIINGO_API_KEY', 'OPENAI_API_KEY', 'SEC_EDGAR_USER_AGENT']) {
     assert.equal(config[field], undefined);
     assert.equal(parseConfig({ [field]: '   ' })[field], undefined);
   }
@@ -31,8 +29,7 @@ test('supported configuration is coerced and unknown environment fields are not 
     NODE_ENV: 'production', HOST: '127.0.0.1', PORT: '7002',
     FRONTEND_ORIGIN: 'http://127.0.0.1:5173',
     DATABASE_URL: 'postgresql://local:synthetic-password@127.0.0.1:5437/new_lab',
-    TIINGO_API_KEY: 'synthetic-tiingo', TWELVE_DATA_API_KEY: 'synthetic-twelve',
-    PRIMARY_MARKET_DATA_PROVIDER: 'twelve_data', FALLBACK_MARKET_DATA_PROVIDER: 'tiingo',
+    TIINGO_API_KEY: 'synthetic-tiingo',
     OPENAI_API_KEY: 'synthetic-openai', OPENAI_MODEL: 'configured-model',
     SEC_EDGAR_USER_AGENT: 'StockResearchLab test@example.org', SEC_EDGAR_MAX_RPS: '3',
     UNRELATED_SECRET: 'synthetic-unrelated',
@@ -40,7 +37,21 @@ test('supported configuration is coerced and unknown environment fields are not 
   assert.equal(config.PORT, 7002);
   assert.equal(config.SEC_EDGAR_MAX_RPS, 3);
   assert.equal(config.OPENAI_MODEL, 'configured-model');
+  assert.equal(config.TIINGO_API_KEY, 'synthetic-tiingo');
+  assert.equal(config.OPENAI_API_KEY, 'synthetic-openai');
+  assert.equal(config.SEC_EDGAR_USER_AGENT, 'StockResearchLab test@example.org');
   assert.equal('UNRELATED_SECRET' in config, false);
+});
+
+test('obsolete provider settings are ignored rather than required or retained', () => {
+  const config = parseConfig({
+    TWELVE_DATA_API_KEY: 'synthetic-obsolete',
+    PRIMARY_MARKET_DATA_PROVIDER: 'unsupported',
+    FALLBACK_MARKET_DATA_PROVIDER: 'unsupported',
+  });
+  for (const field of ['TWELVE_DATA_API_KEY', 'PRIMARY_MARKET_DATA_PROVIDER', 'FALLBACK_MARKET_DATA_PROVIDER']) {
+    assert.equal(field in config, false);
+  }
 });
 
 test('invalid configuration reports only field names, never supplied values', async (t) => {
@@ -54,7 +65,6 @@ test('invalid configuration reports only field names, never supplied values', as
     ['DATABASE_URL', 'not-a-url-synthetic-private-value'], ['DATABASE_URL', 'http://localhost/db'],
     ['DATABASE_URL', 'postgresql://local:synthetic-private-value@127.0.0.1/db?host=remote.example'],
     ['DATABASE_URL', 'postgresql://local:synthetic-private-value@127.0.0.1/db?schema=other'],
-    ['PRIMARY_MARKET_DATA_PROVIDER', 'alpha_vantage'], ['FALLBACK_MARKET_DATA_PROVIDER', 'tiingo'],
     ['OPENAI_MODEL', ''], ['SEC_EDGAR_MAX_RPS', '0'], ['SEC_EDGAR_MAX_RPS', '11'],
     ['SEC_EDGAR_MAX_RPS', '1.5'], ['SEC_EDGAR_USER_AGENT', 'no-contact'],
     ['SEC_EDGAR_USER_AGENT', 'Test contact@example.org\r\nInjected: synthetic-private-value'],

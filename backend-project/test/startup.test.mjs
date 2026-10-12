@@ -9,8 +9,7 @@ import { test } from 'node:test';
 const entrypoint = fileURLToPath(new URL('../dist/index.js', import.meta.url));
 const environment = {
   NODE_ENV: 'test', HOST: '127.0.0.1', FRONTEND_ORIGIN: 'http://localhost:5173',
-  DATABASE_URL: '', TIINGO_API_KEY: '', TWELVE_DATA_API_KEY: '', OPENAI_API_KEY: '',
-  PRIMARY_MARKET_DATA_PROVIDER: 'tiingo', FALLBACK_MARKET_DATA_PROVIDER: 'twelve_data',
+  DATABASE_URL: '', TIINGO_API_KEY: '', OPENAI_API_KEY: '',
   OPENAI_MODEL: 'configured-model', SEC_EDGAR_USER_AGENT: '', SEC_EDGAR_MAX_RPS: '2',
 };
 

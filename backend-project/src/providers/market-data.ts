@@ -20,7 +20,7 @@ export interface NormalizedInstrument {
   availableThrough: string;
 }
 
-export type MarketProviderName = 'TIINGO' | 'TWELVE_DATA';
+export type MarketProviderName = 'TIINGO';
 
 export interface NormalizedPrice {
   tradingDate: string;

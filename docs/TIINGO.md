@@ -4,6 +4,8 @@ Implemented 2026-10-12. This phase adds the backend provider, cache and explicit
 
 ## Configuration and verified provider contract
 
+Tiingo is the sole MVP market-price provider; no primary/fallback selector or automatic fallback is configured. The other two external providers are SEC EDGAR for filings/fundamentals and OpenAI for news/qualitative research. Valid PostgreSQL cache remains available during outages, with stale/unavailable status reported honestly. Additional providers are outside the MVP.
+
 Keep `TIINGO_API_KEY` in the ignored `backend-project/.env`. Restart the backend after changing it. The adapter receives validated backend configuration, sends `Authorization: Token ...` to its fixed HTTPS endpoint, rejects redirects, and never includes tokens in URLs, responses, snapshots or logs. Missing credentials allow startup and cached reads; synchronization returns 503 `PROVIDER_NOT_CONFIGURED`.
 
 Official sources checked on 2026-10-12:

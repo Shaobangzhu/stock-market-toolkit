@@ -35,7 +35,7 @@ test('market routes validate input, preserve local write protections, and perfor
   const valid = await request('/api/stocks/TEST/sync', { method: 'POST', headers, body: '{"startDate":"2026-01-02"}' });
   assert.equal(valid.status, 202);
   assert.match(valid.headers.get('location'), /^\/api\/sync-jobs\//);
-  for (const path of ['/api/stocks/@bad/prices', '/api/stocks/TEST/prices?provider=twelve_data', '/api/stocks/TEST/prices?adjustment=split', '/api/stocks/TEST/prices?limit=5001', '/api/stocks/TEST/prices?from=2026-02-30', '/api/sync-jobs/not-a-uuid']) assert.equal((await request(path)).status, 400);
+  for (const path of ['/api/stocks/@bad/prices', '/api/stocks/TEST/prices?provider=unsupported', '/api/stocks/TEST/prices?adjustment=split', '/api/stocks/TEST/prices?limit=5001', '/api/stocks/TEST/prices?from=2026-02-30', '/api/sync-jobs/not-a-uuid']) assert.equal((await request(path)).status, 400);
   for (const body of [{ startDate: '2026-02-30' }, { startDate: '2026-01-05', endDate: '2026-01-02' }, { startDate: '2026-01-02', fullHistory: true }, { token: 'synthetic-secret' }]) assert.equal((await request('/api/stocks/TEST/sync', { method: 'POST', headers, body: JSON.stringify(body) })).status, 400);
   assert.equal((await request('/api/stocks/TEST/sync')).status, 405);
   assert.equal(JSON.stringify(logs).includes('synthetic-secret'), false);
