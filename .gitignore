@@ -133,4 +133,8 @@ dist
 /backend-project/build/*
 !/backend-project/build/.gitkeep
 
-# **/.env
+# Local database secrets, backups, and generated Prisma client
+/backend-project/.env.postgres
+/backend-project/src/generated/prisma/
+/backups/
+*.dump

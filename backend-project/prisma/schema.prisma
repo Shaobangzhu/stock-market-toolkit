@@ -1,0 +1,299 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MarketDataProvider {
+  TIINGO
+  TWELVE_DATA
+}
+
+enum SyncProvider {
+  TIINGO
+  TWELVE_DATA
+  SEC_EDGAR
+}
+
+enum BarInterval {
+  DAY
+  HOUR
+  MINUTE
+}
+
+enum AdjustmentMode {
+  RAW
+  SPLIT
+  TOTAL_RETURN
+}
+
+enum SyncDataset {
+  PRICES
+  FUNDAMENTALS
+  FILINGS
+}
+
+enum RunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  INTERRUPTED
+}
+
+// Issuers are separate because multiple listings/share classes can share one CIK.
+model Issuer {
+  id          String        @id @default(uuid()) @db.Uuid
+  cik         String        @unique @db.VarChar(10)
+  name        String        @db.VarChar(256)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  instruments Instrument[]
+  filings     SecFiling[]
+  facts       CompanyFact[]
+}
+
+model Instrument {
+  id               String              @id @default(uuid()) @db.Uuid
+  symbol           String              @db.VarChar(32)
+  exchange         String              @db.VarChar(32)
+  name             String              @db.VarChar(256)
+  currency         String              @db.Char(3)
+  exchangeTimezone String              @db.VarChar(64)
+  issuerId         String?             @db.Uuid
+  issuer           Issuer?             @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  createdAt        DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime            @updatedAt @db.Timestamptz(3)
+  watchlistEntry   WatchlistEntry?
+  priceBars        PriceBar[]
+  syncJobs         ProviderSyncJob[]
+  syncStates       ProviderSyncState[]
+  researchRuns     ResearchRun[]
+  researchNotes    ResearchNote[]
+  entryScenarios   EntryScenario[]
+
+  @@unique([symbol, exchange])
+  @@index([issuerId])
+}
+
+model WatchlistEntry {
+  id           String     @id @default(uuid()) @db.Uuid
+  instrumentId String     @unique @db.Uuid
+  instrument   Instrument @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  addedAt      DateTime   @default(now()) @db.Timestamptz(3)
+
+  @@index([addedAt])
+}
+
+model PriceBar {
+  id               String             @id @default(uuid()) @db.Uuid
+  instrumentId     String             @db.Uuid
+  instrument       Instrument         @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  provider         MarketDataProvider
+  interval         BarInterval
+  adjustmentMode   AdjustmentMode
+  // Daily bars use 00:00 UTC as a date key, NOT an exchange opening instant.
+  timestamp        DateTime           @db.Timestamptz(3)
+  tradingDate      DateTime           @db.Date
+  currency         String             @db.Char(3)
+  exchangeTimezone String             @db.VarChar(64)
+  open             Decimal            @db.Decimal(24, 8)
+  high             Decimal            @db.Decimal(24, 8)
+  low              Decimal            @db.Decimal(24, 8)
+  close            Decimal            @db.Decimal(24, 8)
+  // Adjusted volumes may be fractional; RAW volume is constrained to integers.
+  volume           Decimal            @db.Decimal(30, 8)
+  retrievedAt      DateTime           @db.Timestamptz(3)
+  sourceHash       String             @db.Char(64)
+  revision         Int                @default(1)
+  syncJobId        String?            @db.Uuid
+  syncJob          ProviderSyncJob?   @relation(fields: [syncJobId], references: [id], onDelete: Restrict)
+
+  @@unique([instrumentId, provider, interval, adjustmentMode, timestamp], map: "PriceBar_series_timestamp_key")
+  @@index([instrumentId, tradingDate])
+  @@index([syncJobId])
+}
+
+model SecFiling {
+  id                 String        @id @default(uuid()) @db.Uuid
+  issuerId           String        @db.Uuid
+  issuer             Issuer        @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  accessionNumber    String        @unique @db.VarChar(20)
+  form               String        @db.VarChar(32)
+  filedDate          DateTime      @db.Date
+  acceptedAt         DateTime?     @db.Timestamptz(3)
+  reportPeriod       DateTime?     @db.Date
+  primaryDocumentUrl String        @db.Text
+  isAmendment        Boolean       @default(false)
+  retrievedAt        DateTime      @db.Timestamptz(3)
+  facts              CompanyFact[]
+
+  @@unique([id, issuerId])
+  @@index([issuerId, filedDate])
+  @@index([issuerId, reportPeriod])
+}
+
+model CompanyFact {
+  id           String    @id @default(uuid()) @db.Uuid
+  issuerId     String    @db.Uuid
+  issuer       Issuer    @relation(fields: [issuerId], references: [id], onDelete: Restrict)
+  filingId     String    @db.Uuid
+  filing       SecFiling @relation(fields: [filingId, issuerId], references: [id, issuerId], onDelete: Restrict)
+  taxonomy     String    @db.VarChar(64)
+  concept      String    @db.VarChar(256)
+  unit         String    @db.VarChar(64)
+  value        Decimal   @db.Decimal(38, 12)
+  periodStart  DateTime? @db.Date
+  periodEnd    DateTime  @db.Date
+  fiscalYear   Int?
+  fiscalPeriod String?   @db.VarChar(8)
+  // Canonical context (dimensions/frame/period/unit) hash separates restatements.
+  contextHash  String    @db.Char(64)
+  context      Json      @db.JsonB
+  retrievedAt  DateTime  @db.Timestamptz(3)
+
+  @@unique([filingId, taxonomy, concept, unit, contextHash], map: "CompanyFact_context_key")
+  @@index([issuerId, concept, periodEnd])
+  @@index([filingId, issuerId])
+}
+
+model ProviderSyncJob {
+  id              String       @id @default(uuid()) @db.Uuid
+  instrumentId    String       @db.Uuid
+  instrument      Instrument   @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  provider        SyncProvider
+  dataset         SyncDataset
+  status          RunStatus    @default(QUEUED)
+  // Versioned, credential-free request parameters, including price series basis.
+  requestSnapshot Json         @db.JsonB
+  idempotencyKey  String       @unique @db.VarChar(128)
+  attempts        Int          @default(0)
+  createdAt       DateTime     @default(now()) @db.Timestamptz(3)
+  startedAt       DateTime?    @db.Timestamptz(3)
+  finishedAt      DateTime?    @db.Timestamptz(3)
+  heartbeatAt     DateTime?    @db.Timestamptz(3)
+  retryAfter      DateTime?    @db.Timestamptz(3)
+  errorCode       String?      @db.VarChar(64)
+  priceBars       PriceBar[]
+
+  @@index([status, createdAt])
+  @@index([instrumentId, provider, dataset, createdAt])
+}
+
+model ProviderSyncState {
+  id                  String       @id @default(uuid()) @db.Uuid
+  instrumentId        String       @db.Uuid
+  instrument          Instrument   @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  provider            SyncProvider
+  dataset             SyncDataset
+  // Explicit key: e.g. DAY:RAW or SEC filings scope. No nullable uniqueness gaps.
+  scopeKey            String       @db.VarChar(128)
+  lastAttemptAt       DateTime?    @db.Timestamptz(3)
+  lastSuccessAt       DateTime?    @db.Timestamptz(3)
+  lastFailureAt       DateTime?    @db.Timestamptz(3)
+  lastErrorCode       String?      @db.VarChar(64)
+  consecutiveFailures Int          @default(0)
+  coverageStart       DateTime?    @db.Date
+  coverageEnd         DateTime?    @db.Date
+  freshThrough        DateTime?    @db.Timestamptz(3)
+  nextEligibleAt      DateTime?    @db.Timestamptz(3)
+  cursor              Json?        @db.JsonB
+  updatedAt           DateTime     @updatedAt @db.Timestamptz(3)
+
+  @@unique([instrumentId, provider, dataset, scopeKey], map: "ProviderSyncState_scope_key")
+  @@index([lastSuccessAt])
+}
+
+model ResearchRun {
+  id                  String           @id @default(uuid()) @db.Uuid
+  instrumentId        String           @db.Uuid
+  instrument          Instrument       @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  seriesId            String           @db.Uuid
+  version             Int
+  status              RunStatus        @default(QUEUED)
+  idempotencyKey      String           @unique @db.VarChar(128)
+  inputSnapshot       Json             @db.JsonB
+  inputHash           String           @db.Char(64)
+  dataCutoff          DateTime         @db.Timestamptz(3)
+  model               String           @db.VarChar(128)
+  promptVersion       String           @db.VarChar(64)
+  outputSchemaVersion String           @db.VarChar(64)
+  output              Json?            @db.JsonB
+  errorCode           String?          @db.VarChar(64)
+  createdAt           DateTime         @default(now()) @db.Timestamptz(3)
+  completedAt         DateTime?        @db.Timestamptz(3)
+  sources             ResearchSource[]
+  notes               ResearchNote[]
+  scenarios           EntryScenario[]
+
+  @@unique([instrumentId, seriesId, version])
+  @@unique([id, instrumentId])
+  @@index([instrumentId, createdAt])
+  @@index([status, createdAt])
+}
+
+model ResearchSource {
+  id               String      @id @default(uuid()) @db.Uuid
+  researchRunId    String      @db.Uuid
+  researchRun      ResearchRun @relation(fields: [researchRunId], references: [id], onDelete: Restrict)
+  citationKey      String      @db.VarChar(64)
+  url              String      @db.Text
+  title            String      @db.Text
+  publisher        String?     @db.VarChar(256)
+  publishedAt      DateTime?   @db.Timestamptz(3)
+  retrievedAt      DateTime    @db.Timestamptz(3)
+  evidenceSnapshot Json        @db.JsonB
+
+  @@unique([researchRunId, citationKey])
+}
+
+model ResearchNote {
+  id            String       @id @default(uuid()) @db.Uuid
+  instrumentId  String       @db.Uuid
+  instrument    Instrument   @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  researchRunId String?      @db.Uuid
+  researchRun   ResearchRun? @relation(fields: [researchRunId, instrumentId], references: [id, instrumentId], onDelete: Restrict)
+  seriesId      String       @db.Uuid
+  version       Int
+  content       String       @db.Text
+  createdAt     DateTime     @default(now()) @db.Timestamptz(3)
+
+  @@unique([instrumentId, seriesId, version])
+  @@index([instrumentId, createdAt])
+  @@index([researchRunId, instrumentId])
+}
+
+model EntryScenario {
+  id             String       @id @default(uuid()) @db.Uuid
+  instrumentId   String       @db.Uuid
+  instrument     Instrument   @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  researchRunId  String?      @db.Uuid
+  researchRun    ResearchRun? @relation(fields: [researchRunId, instrumentId], references: [id, instrumentId], onDelete: Restrict)
+  seriesId       String       @db.Uuid
+  version        Int
+  method         String       @db.VarChar(64)
+  methodVersion  String       @db.VarChar(64)
+  inputSnapshot  Json         @db.JsonB
+  assumptions    Json         @db.JsonB
+  resultSnapshot Json         @db.JsonB
+  currency       String       @db.Char(3)
+  lowerPrice     Decimal?     @db.Decimal(24, 8)
+  upperPrice     Decimal?     @db.Decimal(24, 8)
+  dataCutoff     DateTime     @db.Timestamptz(3)
+  createdAt      DateTime     @default(now()) @db.Timestamptz(3)
+
+  @@unique([instrumentId, seriesId, version])
+  @@index([instrumentId, createdAt])
+  @@index([researchRunId, instrumentId])
+}
+
+model AppPreference {
+  key           String   @id @db.VarChar(64)
+  value         Json     @db.JsonB
+  schemaVersion Int      @default(1)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+}

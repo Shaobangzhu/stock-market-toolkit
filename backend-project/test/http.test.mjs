@@ -211,3 +211,24 @@ test('logger drops raw exception, credential, URL and request metadata fields', 
   assert.deepEqual(JSON.parse(lines.join('')), { level: 'error', event: 'request_failed', status: 500, code: 'INTERNAL_ERROR' });
   assert.ok(!lines.join('').includes('synthetic-secret'));
 });
+
+test('readiness returns 503 when unconfigured or unavailable and never leaks driver errors', async (t) => {
+  for (const database of [undefined, { ready: async () => false }, { ready: async () => { throw new Error('postgresql://user:synthetic-secret@localhost/db'); } }]) {
+    const { send, logs } = await serve(t, createApiRouter(database));
+    const response = await send('/api/ready');
+    errorIs(response, 503, 'DATABASE_UNAVAILABLE');
+    assert.ok(!JSON.stringify({ response, logs }).includes('synthetic-secret'));
+    assert.equal((await send('/api/health')).status, 200);
+  }
+});
+
+test('readiness validates requests and reports a connected database without writes', async (t) => {
+  let checks = 0;
+  const { send } = await serve(t, createApiRouter({ ready: async () => { checks++; return true; } }));
+  const response = await send('/api/ready');
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.json, { data: { status: 'ready', database: 'ok' } });
+  assert.equal(checks, 1);
+  errorIs(await send('/api/ready?unexpected=1'), 400, 'VALIDATION_ERROR');
+  assert.equal(checks, 1);
+});

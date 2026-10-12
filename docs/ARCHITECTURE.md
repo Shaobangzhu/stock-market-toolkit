@@ -4,7 +4,7 @@ Audit date: 2026-10-11 (America/Los_Angeles). Repository: [Shaobangzhu/stock-mar
 
 Sections 1–3 describe observed implementation. Sections 4–9 are proposed implementation decisions, not claims that those systems already exist. [Product scope](PRODUCT_SCOPE.md) is authoritative for feature boundaries; [implementation plan](IMPLEMENTATION_PLAN.md) defines delivery gates.
 
-**Subsequent implementation:** the backend-only Phase 1 refactor is recorded in [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md). The audit findings below describe the original commit. Phase 1 uses the requested `src/routes/` and `src/middleware/` layout, keeps startup in `src/index.ts`, emits to ignored `dist/`, and exposes the explicitly requested `/api/health`; domain APIs and persistence remain future phases.
+**Subsequent implementation:** the backend-only Phase 1 refactor is recorded in [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md). The audit findings below describe the original commit. Phase 1 uses the requested `src/routes/` and `src/middleware/` layout, keeps startup in `src/index.ts`, emits to ignored `dist/`, and exposes the explicitly requested `/api/health`; domain APIs remain future phases. PostgreSQL/Prisma persistence is now implemented as recorded in [DATABASE.md](DATABASE.md). Its schema contracts supersede the original proposals in section 6.
 
 ## 1. Actual current architecture
 
@@ -170,7 +170,9 @@ API reads do not persist domain data or start jobs. Symbol search is a deliberat
 
 Use `{data, meta?}` for success and `{error:{code,message,details?,requestId}}` for failure. Apply real statuses: 400 invalid input, 403 rejected origin/host policy, 404 unknown entity, 409 conflicting/idempotency mismatch, 422 insufficient or unsupported data, 429 local quota limit, 502 upstream failure, 503 unavailable DB/provider configuration, 504 timeout. Async failures appear on the job; 202 means accepted, not completed. Return Decimal/BigInt as JSON strings; convert only chart display values to bounded finite numbers. Include currency, provider, trading date, retrieval time, adjustment basis, and coverage in relevant metadata.
 
-## 6. Proposed database model
+## 6. Original proposed database model
+
+**Implemented foundation:** see [DATABASE.md](DATABASE.md) and `backend-project/prisma/schema.prisma`. The approved implementation uses `(symbol, exchange)` uniqueness; separate `PriceBar` rows per provider/interval/adjustment; exact Decimal volume with an integer constraint for RAW; `CompanyFact`, `SecFiling`, `ProviderSyncJob`, `ProviderSyncState`, `ResearchRun`, `ResearchSource`, `ResearchNote`, `EntryScenario`, and `AppPreference`. `Issuer` is retained for shared SEC identity. ProviderSymbol and additional workflow-specific fields are deferred. The table below preserves the original audit proposal, not the implemented schema.
 
 Use PostgreSQL with Prisma and reviewed SQL migrations for constraints that need SQL. UUID primary keys, foreign keys, explicit indexes, UTC `timestamptz` for instants, and `date` for daily exchange trading dates. Use fixed-precision Decimal for prices/fundamentals/calculations and BigInt for raw share volume; adjusted volume may be fractional and requires Decimal. Precision/scale must be chosen against provider fixtures before migration approval.
 

@@ -5,10 +5,12 @@ import { errorHandler, notFound } from './middleware/error-handler.js';
 import { localAccess } from './middleware/local-access.js';
 import { requestContext } from './middleware/request-context.js';
 import { logger, type Logger } from './utils/logger.js';
+import type { DatabaseHealth } from './services/database.js';
 
 export interface AppOptions {
   router?: Router;
   logger?: Logger;
+  database?: DatabaseHealth;
 }
 
 export function createApp(config: AppConfig, options: AppOptions = {}) {
@@ -21,7 +23,7 @@ export function createApp(config: AppConfig, options: AppOptions = {}) {
   app.use(localAccess(config));
   app.use(express.json({ limit: '32kb', strict: true, inflate: false }));
   app.use(express.urlencoded({ extended: false, limit: '32kb', parameterLimit: 100, inflate: false }));
-  app.use('/api', options.router ?? createApiRouter());
+  app.use('/api', options.router ?? createApiRouter(options.database));
   app.use(notFound);
   app.use(errorHandler(options.logger ?? logger));
   return app;

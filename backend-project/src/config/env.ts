@@ -19,11 +19,16 @@ const frontendOrigin = z.string().refine((value) => {
 }, 'Must be a local HTTP origin without credentials, path, query, or fragment');
 
 const databaseUrl = optionalText.refine((value) => {
-  if (value === undefined) return true; // Phase 1 has no persistence dependency.
+  if (value === undefined) return true; // Liveness works; readiness reports 503 until configured.
   try {
     const url = new URL(value);
     return ['postgresql:', 'postgres:'].includes(url.protocol)
-      && localHosts.has(url.hostname) && url.pathname.length > 1;
+      && localHosts.has(url.hostname) && url.pathname.length > 1
+      && !!url.username && !!url.password && !url.hash
+      // pg accepts query parameters overriding the URL host/database. Disallow
+      // these so a URL which looks local cannot connect to an external server.
+      && [...url.searchParams.keys()].every((key) => key === 'schema')
+      && (url.searchParams.get('schema') === null || url.searchParams.get('schema') === 'public');
   } catch {
     return false;
   }
@@ -62,6 +67,12 @@ export class ConfigError extends Error {
     super(`Invalid configuration fields: ${fields.join(', ')}`);
     this.name = 'ConfigError';
   }
+}
+
+export function parseDatabaseUrl(value: unknown): string | undefined {
+  const result = databaseUrl.safeParse(value);
+  if (!result.success) throw new ConfigError(['DATABASE_URL']);
+  return result.data;
 }
 
 export function parseConfig(environment: Record<string, unknown>): AppConfig {

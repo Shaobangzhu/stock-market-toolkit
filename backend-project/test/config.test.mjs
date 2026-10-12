@@ -48,6 +48,8 @@ test('invalid configuration reports only field names, never supplied values', as
     ['FRONTEND_ORIGIN', 'http://user:synthetic-private-value@localhost:5173'],
     ['DATABASE_URL', 'postgresql://local:synthetic-private-value@remote.example/db'],
     ['DATABASE_URL', 'not-a-url-synthetic-private-value'], ['DATABASE_URL', 'http://localhost/db'],
+    ['DATABASE_URL', 'postgresql://local:synthetic-private-value@127.0.0.1/db?host=remote.example'],
+    ['DATABASE_URL', 'postgresql://local:synthetic-private-value@127.0.0.1/db?schema=other'],
     ['PRIMARY_MARKET_DATA_PROVIDER', 'alpha_vantage'], ['FALLBACK_MARKET_DATA_PROVIDER', 'tiingo'],
     ['OPENAI_MODEL', ''], ['SEC_EDGAR_MAX_RPS', '0'], ['SEC_EDGAR_MAX_RPS', '11'],
     ['SEC_EDGAR_MAX_RPS', '1.5'], ['SEC_EDGAR_USER_AGENT', 'no-contact'],
