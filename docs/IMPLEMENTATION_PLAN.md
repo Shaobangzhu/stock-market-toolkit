@@ -4,7 +4,7 @@ Baseline date: 2026-10-11 (America/Los_Angeles). Based on the audited commit and
 
 This plan authorizes no implementation by itself. The current phase creates those four documents only. No application code, dependencies, lockfiles, legacy data, services, or database state is changed. Later implementation prompts should name a phase and satisfy its exit gate before moving on.
 
-**Progress:** the user subsequently authorized the backend-only Phase 1 refactor. See [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md) for implemented behavior, exact changed paths, commands, tests, and limitations. PostgreSQL/Prisma foundation is now implemented; see [DATABASE.md](DATABASE.md) and [validation record](DATABASE_VALIDATION.md). Frontend modernization remains pending. Legacy JSON files were explicitly authorized for deletion without migration or backups.
+**Progress:** the backend-only Phase 1 refactor is recorded in [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md). PostgreSQL/Prisma foundation is implemented; see [DATABASE.md](DATABASE.md) and [validation record](DATABASE_VALIDATION.md). The frontend infrastructure and page shells now use React 19, Vite, Ant Design, ECharts, BrowserRouter, and the required three-item navigation; see [frontend setup](../frontend-project/README.md). Watchlist and Stock Research business APIs, provider connections, entry-price calculations, and built-SPA serving are still future work. Legacy JSON files were explicitly authorized for deletion without migration or backups.
 
 ## Implementation sequence
 

@@ -41,7 +41,7 @@ JSON and URL-encoded parsers are Express built-ins with a 32 KiB limit and no co
 
 Errors use `{error:{code,message,requestId}}`, with 400 validation/malformed input, 403 local-access rejection, 404 unknown endpoint, 405 wrong method, 413 oversized body, 415 unsupported encoding/content type, 500 unexpected failure, or 503 database unavailability. Public messages are safe constants. Logs contain operational metadata, never raw error/config/request objects, request URLs/bodies, stack traces, or API key values. Startup uses validated config, handles listen failures safely, and closes on SIGINT/SIGTERM with a bounded deadline.
 
-The database foundation is implemented below; provider adapters, market fetches, and job execution remain future work. No seeds or legacy data migration exist. HTTP tests use ephemeral listeners; database fixtures run only in isolated test databases. The legacy frontend is still pending modernization and calls APIs that no longer exist.
+The database foundation is implemented below; provider adapters, market fetches, and job execution remain future work. No seeds or legacy data migration exist. HTTP tests use ephemeral listeners; database fixtures run only in isolated test databases. The React 19/Vite frontend shell is now available; it calls only the readiness API from Data & Settings. Watchlist and Stock Research domain APIs remain future work.
 
 ## PostgreSQL foundation
 

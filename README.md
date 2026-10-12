@@ -1,154 +1,36 @@
 # Stock Research Lab
 
-The Express backend has been refactored for local-only, single-user operation. See [backend setup and API](backend-project/README.md) and the [Phase 1 implementation record](docs/PHASE_1_BACKEND.md). From `backend-project/`, run `npm ci`, `npm run build`, then `npm start`; health is at `http://127.0.0.1:7001/api/health`.
+Stock Research Lab is a local-only, single-user stock research project. The current implementation has an Express API, an empty PostgreSQL/Prisma database foundation, and a React frontend shell. Market-data imports, watchlist persistence, research generation, and entry-price calculations are later phases; opening the app does not create stock records or run provider jobs.
 
-The local PostgreSQL/Prisma foundation is available on `127.0.0.1:5437`. Follow [database setup, migrations, tests and backups](docs/DATABASE.md); readiness is `/api/ready`. The application database starts empty.
+## Run locally
 
-The frontend has not yet been modernized and still calls removed login and JSON-data APIs. Product requirements are in [PRODUCT_SCOPE.md](docs/PRODUCT_SCOPE.md); the screenshots and historical README below describe the previous prototype, not currently supported features or setup.
+Use Node.js 24 (or a supported Node.js 22 release) and the existing local Docker installation. Follow [database setup](docs/DATABASE.md) to configure the ignored backend environment files and start only the dedicated `srl-postgres` container. On this machine its PostgreSQL port is `127.0.0.1:5437`; inspect availability before using that port elsewhere. Do not commit `backend-project/.env` or database credentials.
 
----
-
-# Historical Money Piranha prototype 📈
-
-A full-stack stock market toolkit for experimenting with stock market strategies in a modular, scalable, and UI-driven environment. Built with Express, TypeScript, React, and ECharts.
-
----
-
-## 🗂 Project Structure
-
-```
-stock-market-toolkit/
-├── backend-project/    # Express backend with session-based auth and route decorators
-└── frontend-project/   # React frontend with Ant Design and ECharts
-```
-
----
-
-## 🔧 Features
-
-- ✅ Session-based login/logout
-- 📊 Fetch and display stock price data over time
-- 📈 ECharts-powered data visualization
-- 🔐 Route protection via custom middleware
-- 💡 Uses decorators for clean controller structure (inspired by NestJS)
-
----
-
-## 📸 App Screenshots
-
-Below are the key user interfaces of the **Money Piranha** web app:
-
----
-
-### 📝 Sign Up
-Create a new account securely with email and password.
-
-![Sign Up Screen](./assets/sign_up.png)
-
----
-
-### 🔐 Log In
-Access your personalized stock dashboard.
-
-![Log In Screen](./assets/login.png)
-
----
-
-### 📋 Watchlist Dashboard
-View and manage your stock watchlist with real-time price and change data.
-
-![Watchlist Dashboard](./assets/dashboard.png)
-
----
-
-### 📈 Stock Detail Page
-Analyze stock trends and chip distribution across time ranges.
-
-![Stock Detail](./assets/stock_detail.png)
-
----
-
-## ⚙️ Tech Stack
-**Frontend**: React, TypeScript, React Router, Ant Design, ECharts
-
-**Backend**: Express, TypeScript, reflect-metadata, cookie-session
-
-**Dev Tools**: ts-node, nodemon, concurrently
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/Shaobangzhu/daytrade-framework.git
-cd daytrade-framework
-```
-
-### 2. Setup Backend
+In separate terminals:
 
 ```bash
 cd backend-project
-npm install
-npm run start
+npm ci
+npm run db:migrate
+npm run build
+npm start
 ```
-
-- Runs at: `http://localhost:7001`
-- Available Endpoints:
-  - `POST /api/login`
-  - `GET /api/logout`
-  - `GET /api/isLogin`
-  - `GET /api/getData`
-  - `GET /api/showData`
-
-### 3. Setup Frontend
 
 ```bash
-cd backend-project
-npm install
-npm run start
+cd frontend-project
+npm ci
+npm run dev
 ```
 
-- Runs at: `http://localhost:3000`
-- Pages:
-  - `/login` — Login form
-  - `/` — Home page with chart and data actions
+Open [http://localhost:5173/](http://localhost:5173/). The Vite server binds to loopback and proxies `/api` to the Express server at `127.0.0.1:7001`. Use `localhost:5173` in the browser to match the backend's default `FRONTEND_ORIGIN`; if you choose a different local origin, set it explicitly in the ignored backend `.env`. Backend liveness is `/api/health`; database readiness is `/api/ready`.
 
----
+The frontend uses BrowserRouter with Vite's SPA fallback. Direct navigation works at `/`, `/stocks/:symbol`, `/stocks/:symbol?tab=price-volume`, `/stocks/:symbol?history=open`, and `/settings`. Entering a symbol opens a research shell; it does not resolve, save, or import a stock yet. See the [frontend foundation](frontend-project/README.md) for scripts and current UI boundaries.
 
-## 📁 Data File
-Stock data is saved to:
-backend-project/data/prices.json
+## Project guidance
 
-use Node.js’s path module to resolve the path dynamically:
+- [Product scope](docs/PRODUCT_SCOPE.md) and [architecture](docs/ARCHITECTURE.md)
+- [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
+- [Backend API and configuration](backend-project/README.md)
+- [Database setup, migrations, and backup](docs/DATABASE.md)
 
-```bash
-import path from 'path';
-
-const filePath = path.resolve(__dirname, '../data/prices.json');
-
-```
-This approach works safely across:
-- ✅ Windows
-- ✅ macOS
-- ✅ Linux
-- ✅ Varying directory structures
-
----
-
-## 📌 TODO
-- [ ] Add user registration
-- [ ] Save user watchlists
-- [ ] Store data in a NoSQL database (e.g., MongoDB)
-- [ ] Implement trading strategy editor
-
-
----
-
-## 📝 License
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-> ⚠️ **Disclaimer**: This is a personal project for educational purposes. It is not intended for real-world trading use without further validation, error handling, and security.
+The `assets/` screenshots document the former prototype and are not current product screens. No sign-in, account, trading, or cloud deployment is part of this application.

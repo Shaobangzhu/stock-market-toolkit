@@ -4,7 +4,7 @@ Audit date: 2026-10-11 (America/Los_Angeles). Repository: [Shaobangzhu/stock-mar
 
 Sections 1–3 describe observed implementation. Sections 4–9 are proposed implementation decisions, not claims that those systems already exist. [Product scope](PRODUCT_SCOPE.md) is authoritative for feature boundaries; [implementation plan](IMPLEMENTATION_PLAN.md) defines delivery gates.
 
-**Subsequent implementation:** the backend-only Phase 1 refactor is recorded in [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md). The audit findings below describe the original commit. Phase 1 uses the requested `src/routes/` and `src/middleware/` layout, keeps startup in `src/index.ts`, emits to ignored `dist/`, and exposes the explicitly requested `/api/health`; domain APIs remain future phases. PostgreSQL/Prisma persistence is now implemented as recorded in [DATABASE.md](DATABASE.md). Its schema contracts supersede the original proposals in section 6.
+**Subsequent implementation:** the audit findings below describe the original commit, not the current working tree. The backend-only Phase 1 refactor is recorded in [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md). It uses `src/routes/` and `src/middleware/`, keeps startup in `src/index.ts`, emits to ignored `dist/`, and exposes `/api/health`. PostgreSQL/Prisma persistence is recorded in [DATABASE.md](DATABASE.md); its schema contracts supersede the original proposals in section 6. The frontend foundation now uses Vite, React 19, BrowserRouter, the three required navigation items, and empty page shells as described in [frontend setup](../frontend-project/README.md). The later-phase API and production-serving sections remain proposals unless separately marked implemented.
 
 ## 1. Actual current architecture
 
