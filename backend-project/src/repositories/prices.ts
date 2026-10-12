@@ -40,6 +40,7 @@ export function priceRepository(db: Prisma.TransactionClient) {
 export function serializePriceBar(bar: PriceBar) {
   return { ...bar,
     open: bar.open.toFixed(), high: bar.high.toFixed(), low: bar.low.toFixed(), close: bar.close.toFixed(), volume: bar.volume.toFixed(),
+    dividendCash: bar.dividendCash?.toFixed() ?? null, splitFactor: bar.splitFactor?.toFixed() ?? null,
     timestamp: bar.timestamp.toISOString(), tradingDate: bar.tradingDate.toISOString().slice(0, 10), retrievedAt: bar.retrievedAt.toISOString(),
   };
 }

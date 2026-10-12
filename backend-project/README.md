@@ -25,7 +25,7 @@ Supported fields: `NODE_ENV`, `HOST`, `PORT`, `FRONTEND_ORIGIN`, `DATABASE_URL`,
 {"data":{"status":"ok","application":"Stock Research Lab"}}
 ```
 
-This is liveness only: it does not check PostgreSQL/provider availability, expose configuration, or write data. It accepts no query parameters or body. HEAD is supported; other non-OPTIONS methods return 405 after the local write checks. Unknown endpoints return 404. Authentication and legacy JSON-data endpoints are removed. The stock/watchlist/settings APIs and `/api/v1` domain namespace will be added in subsequent phases; the requested health endpoint is intentionally `/api/health`.
+This is liveness only: it does not check PostgreSQL/provider availability, expose configuration, or write data. It accepts no query parameters or body. HEAD is supported; other non-OPTIONS methods return 405 after the local write checks. Unknown endpoints return 404. Authentication and legacy JSON-data endpoints are removed. Implemented endpoints use the explicitly requested `/api` namespace; Tiingo price/sync/status routes are documented in [TIINGO.md](../docs/TIINGO.md). Watchlist/settings business APIs remain later phases.
 
 All future POST/PUT/PATCH/DELETE requests must include:
 
@@ -41,7 +41,7 @@ JSON and URL-encoded parsers are Express built-ins with a 32 KiB limit and no co
 
 Errors use `{error:{code,message,requestId}}`, with 400 validation/malformed input, 403 local-access rejection, 404 unknown endpoint, 405 wrong method, 413 oversized body, 415 unsupported encoding/content type, 500 unexpected failure, or 503 database unavailability. Public messages are safe constants. Logs contain operational metadata, never raw error/config/request objects, request URLs/bodies, stack traces, or API key values. Startup uses validated config, handles listen failures safely, and closes on SIGINT/SIGTERM with a bounded deadline.
 
-The database foundation is implemented below; provider adapters, market fetches, and job execution remain future work. No seeds or legacy data migration exist. HTTP tests use ephemeral listeners; database fixtures run only in isolated test databases. The React 19/Vite frontend shell is now available; it calls only the readiness API from Data & Settings. Watchlist and Stock Research domain APIs remain future work.
+The database foundation and Tiingo daily-history adapter, cache and explicit sync jobs are implemented. See [Tiingo API and limits](../docs/TIINGO.md). No seeds or legacy data migration exist. HTTP tests use ephemeral listeners; database fixtures run only in isolated test databases. The React 19/Vite frontend shell currently calls only the readiness API from Data & Settings; chart/watchlist API wiring remains future work.
 
 ## PostgreSQL foundation
 

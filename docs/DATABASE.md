@@ -1,6 +1,6 @@
 # Local PostgreSQL foundation
 
-Implemented 2026-10-12. This document supersedes the database proposals in the original architecture audit. There are no application users, authentication tables, seeds, provider calls, or legacy imports.
+Implemented 2026-10-12. This document supersedes the database proposals in the original architecture audit. There are no application users, authentication tables, seeds, startup provider calls, or legacy imports. The subsequent [Tiingo phase](TIINGO.md) adds explicit market imports and a schema-only second migration.
 
 ## Installed configuration
 
@@ -73,7 +73,7 @@ Stop/restart only this service. Do not use volume deletion, volume pruning, or r
 
 ## Schema contracts
 
-The source of truth is `backend-project/prisma/schema.prisma` plus reviewed SQL migrations. All **13** application tables begin empty. Enums are schema objects, not seeded lookup rows.
+The source of truth is `backend-project/prisma/schema.prisma` plus reviewed SQL migrations. All **14** application tables begin empty. Enums are schema objects, not seeded lookup rows. The Tiingo migration adds `ProviderRequestUsage` for quota accounting, original numeric fields/corporate actions on `PriceBar`, and result snapshots on sync jobs.
 
 | Entity | Important boundaries |
 | --- | --- |
@@ -91,13 +91,13 @@ The source of truth is `backend-project/prisma/schema.prisma` plus reviewed SQL 
 | `EntryScenario` | Append-only versioned method/assumptions/input/result snapshots, exact optional price bounds. No financial formula is implemented. |
 | `AppPreference` | Sparse nonsecret JSON overrides with schema version; no default row. Future API must allowlist keys and validate value schemas. |
 
-Prices use `numeric(24,8)` (16 integer digits), volumes `numeric(30,8)` (22 integer digits; RAW restricted to integers), facts `numeric(38,12)` (26 integer digits). `exactDecimal` accepts plain decimal **strings**, rejecting JavaScript numbers, exponents, nonfinite values, and excess scale/precision. Repositories and future provider normalization must use this path for exact values. Monetary values inside JSON snapshots must also remain strings; JSON alone cannot enforce that contract. `serializePriceBar` emits decimals as strings and dates deliberately. Provider fixture validation must confirm these bounds before imports are implemented.
+Prices use `numeric(24,8)` (16 integer digits), volumes `numeric(30,8)` (22 integer digits; RAW restricted to integers), facts `numeric(38,12)` (26 integer digits). `exactDecimal` accepts plain decimal **strings**, rejecting JavaScript numbers, exponents, nonfinite values, and excess scale/precision. Tiingo normalization captures original numeric lexemes, validates with Decimal arithmetic and explicitly rounds to the storage scale while preserving the originals in `sourceData`; see [TIINGO.md](TIINGO.md). Monetary JSON values also remain strings. `serializePriceBar` emits decimals as strings and dates deliberately.
 
 Instants use `timestamptz(3)` and the connection timezone is UTC. Session/reporting dates use PostgreSQL `date`. A DAY bar's timestamp is the trading date at 00:00 UTC **as a canonical date key**, not an exchange open/close instant. Intraday intervals are reserved in the schema but provider support is not implemented. Never infer historical availability from a date-only filing without acceptance time.
 
 SQL adds checks for coherent positive OHLC, nonnegative/integer raw volume, finite decimals, reporting periods, daily date identity, currency/hash formats, valid timezone names, version numbers and terminal job states. Foreign keys restrict destructive deletion. Indexes cover price series, instrument/date history, issuer/report periods, status queues, research history and foreign keys. Triggers preserve saved research/source/note/scenario history; changing a saved result requires a new version.
 
-Only instrument/watchlist and price repository foundations are implemented. Workflows, provider-specific symbol mappings, worker claim/concurrency policy, full research/fundamental repositories, supported metrics, retention, and entry methodology belong to later phases. `priceRepository.save` upserts one current observation and increments its revision on each explicit write; it is not a full point-in-time price archive.
+Instrument/watchlist and price repository foundations plus Tiingo workflows and quota/job admission are implemented. Full research/fundamental repositories, supported metrics, retention, multi-provider mappings and entry methodology belong to later phases. `priceRepository.save` remains a low-level exact-string writer; the Tiingo bulk upsert increments revisions only when source content changes. These current observations are not a full point-in-time price archive; research reports preserve input snapshots.
 
 ## Migration and validation
 

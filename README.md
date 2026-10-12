@@ -1,6 +1,6 @@
 # Stock Research Lab
 
-Stock Research Lab is a local-only, single-user stock research project. The current implementation has an Express API, an empty PostgreSQL/Prisma database foundation, and a React frontend shell. Market-data imports, watchlist persistence, research generation, and entry-price calculations are later phases; opening the app does not create stock records or run provider jobs.
+Stock Research Lab is a local-only, single-user stock research project. The current implementation has an Express API, PostgreSQL/Prisma persistence, a Tiingo daily-history backend, and a React frontend shell. Explicit API syncs can import market data; Watchlist persistence, frontend data wiring, research generation and entry-price calculations are later phases. Opening the app does not create stock records or run provider jobs.
 
 ## Run locally
 
@@ -32,5 +32,6 @@ The frontend uses BrowserRouter with Vite's SPA fallback. Direct navigation work
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Backend API and configuration](backend-project/README.md)
 - [Database setup, migrations, and backup](docs/DATABASE.md)
+- [Tiingo endpoints, synchronization, and coverage](docs/TIINGO.md)
 
 The `assets/` screenshots document the former prototype and are not current product screens. No sign-in, account, trading, or cloud deployment is part of this application.

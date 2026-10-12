@@ -109,6 +109,10 @@ model PriceBar {
   volume           Decimal            @db.Decimal(30, 8)
   retrievedAt      DateTime           @db.Timestamptz(3)
   sourceHash       String             @db.Char(64)
+  // Exact provider numeric lexemes; prices are explicitly rounded to scale 8.
+  sourceData       Json?              @db.JsonB
+  dividendCash     Decimal?           @db.Decimal(24, 8)
+  splitFactor      Decimal?           @db.Decimal(30, 12)
   revision         Int                @default(1)
   syncJobId        String?            @db.Uuid
   syncJob          ProviderSyncJob?   @relation(fields: [syncJobId], references: [id], onDelete: Restrict)
@@ -178,10 +182,25 @@ model ProviderSyncJob {
   heartbeatAt     DateTime?    @db.Timestamptz(3)
   retryAfter      DateTime?    @db.Timestamptz(3)
   errorCode       String?      @db.VarChar(64)
+  resultSnapshot  Json?        @db.JsonB
   priceBars       PriceBar[]
 
   @@index([status, createdAt])
   @@index([instrumentId, provider, dataset, createdAt])
+}
+
+// Each outbound attempt reserves its bounded response size before sending.
+// Usage is shared across jobs/restarts; never stores a token or request URL.
+model ProviderRequestUsage {
+  id            String       @id @default(uuid()) @db.Uuid
+  provider      SyncProvider
+  symbol        String       @db.VarChar(32)
+  requestedAt   DateTime     @default(now()) @db.Timestamptz(3)
+  responseBytes BigInt
+  errorCode     String?      @db.VarChar(64)
+  retryAfter    DateTime?    @db.Timestamptz(3)
+
+  @@index([provider, requestedAt])
 }
 
 model ProviderSyncState {

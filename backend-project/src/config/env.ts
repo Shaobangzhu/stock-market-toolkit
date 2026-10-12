@@ -44,6 +44,11 @@ export const configSchema = z.object({
   FRONTEND_ORIGIN: frontendOrigin.default('http://localhost:5173'),
   DATABASE_URL: databaseUrl,
   TIINGO_API_KEY: optionalText,
+  // Verified Starter defaults: https://www.tiingo.com/about/pricing (2026-10-12).
+  TIINGO_MAX_REQUESTS_PER_HOUR: z.coerce.number().int().min(1).max(100000).default(50),
+  TIINGO_MAX_REQUESTS_PER_DAY: z.coerce.number().int().min(1).max(1000000).default(1000),
+  TIINGO_MAX_SYMBOLS_PER_MONTH: z.coerce.number().int().min(1).max(1000000).default(500),
+  TIINGO_MAX_BYTES_PER_MONTH: z.coerce.number().int().min(8388608).max(1000000000000).default(1000000000),
   TWELVE_DATA_API_KEY: optionalText,
   PRIMARY_MARKET_DATA_PROVIDER: marketDataProviderSchema.default('tiingo'),
   FALLBACK_MARKET_DATA_PROVIDER: marketDataProviderSchema.default('twelve_data'),

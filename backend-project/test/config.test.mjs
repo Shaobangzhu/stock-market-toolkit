@@ -15,6 +15,10 @@ test('defaults allow startup without a database or any optional provider credent
   assert.equal(config.PRIMARY_MARKET_DATA_PROVIDER, 'tiingo');
   assert.equal(config.FALLBACK_MARKET_DATA_PROVIDER, 'twelve_data');
   assert.equal(config.SEC_EDGAR_MAX_RPS, 2);
+  assert.equal(config.TIINGO_MAX_REQUESTS_PER_HOUR, 50);
+  assert.equal(config.TIINGO_MAX_REQUESTS_PER_DAY, 1000);
+  assert.equal(config.TIINGO_MAX_SYMBOLS_PER_MONTH, 500);
+  assert.equal(config.TIINGO_MAX_BYTES_PER_MONTH, 1000000000);
   for (const field of ['DATABASE_URL', 'TIINGO_API_KEY', 'TWELVE_DATA_API_KEY', 'OPENAI_API_KEY', 'SEC_EDGAR_USER_AGENT']) {
     assert.equal(config[field], undefined);
     assert.equal(parseConfig({ [field]: '   ' })[field], undefined);
@@ -54,6 +58,8 @@ test('invalid configuration reports only field names, never supplied values', as
     ['OPENAI_MODEL', ''], ['SEC_EDGAR_MAX_RPS', '0'], ['SEC_EDGAR_MAX_RPS', '11'],
     ['SEC_EDGAR_MAX_RPS', '1.5'], ['SEC_EDGAR_USER_AGENT', 'no-contact'],
     ['SEC_EDGAR_USER_AGENT', 'Test contact@example.org\r\nInjected: synthetic-private-value'],
+    ['TIINGO_MAX_REQUESTS_PER_HOUR', '0'], ['TIINGO_MAX_REQUESTS_PER_DAY', 'not-a-number'],
+    ['TIINGO_MAX_SYMBOLS_PER_MONTH', '1.5'], ['TIINGO_MAX_BYTES_PER_MONTH', '1'],
   ];
   for (const [index, [field, value]] of cases.entries()) {
     await t.test(`${field}: rejects invalid case ${index + 1}`, () => {

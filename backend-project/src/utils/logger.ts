@@ -1,7 +1,7 @@
 // Logs accept only allowlisted operational metadata, never Error/config/request objects.
 export interface LogEntry {
   event: 'server_started' | 'server_start_failed' | 'server_stopping' | 'server_stop_failed'
-    | 'configuration_invalid' | 'request_failed';
+    | 'configuration_invalid' | 'request_failed' | 'sync_failure_persistence_failed';
   host?: '127.0.0.1';
   port?: number;
   fields?: readonly string[];

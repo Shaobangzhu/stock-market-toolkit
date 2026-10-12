@@ -41,6 +41,9 @@ export function errorHandler(log: Logger): ErrorRequestHandler {
       response.destroy();
       return;
     }
+    if (error instanceof HttpError && 'retryAfter' in error && error.retryAfter instanceof Date) {
+      response.setHeader('Retry-After', Math.max(1, Math.ceil((error.retryAfter.getTime() - Date.now()) / 1000)));
+    }
     response.status(failure.status).json({
       error: { code: failure.code, message: failure.publicMessage, requestId },
     });

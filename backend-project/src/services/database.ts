@@ -28,7 +28,7 @@ export function createDatabase(config: Pick<AppConfig, 'DATABASE_URL'>) {
         // LIMIT 0 validates schema accessibility without scanning domain data.
         await client.$queryRaw`SELECT 1 FROM "Instrument", "Issuer", "WatchlistEntry",
           "PriceBar", "CompanyFact", "SecFiling", "ProviderSyncJob", "ProviderSyncState",
-          "ResearchRun", "ResearchSource", "ResearchNote", "EntryScenario", "AppPreference" LIMIT 0`;
+          "ResearchRun", "ResearchSource", "ResearchNote", "EntryScenario", "AppPreference", "ProviderRequestUsage" LIMIT 0`;
         return true;
       } catch {
         return false; // Never expose connection details, SQL, or underlying exceptions.

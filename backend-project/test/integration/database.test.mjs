@@ -35,10 +35,10 @@ function run(instrumentId, extra = {}) {
     inputHash: 'b'.repeat(64), dataCutoff: new Date(), model: 'test-only', promptVersion: '1', outputSchemaVersion: '1', ...extra };
 }
 
-test('fresh migration creates exactly 13 empty domain tables and constrained indexes', async () => {
+test('fresh migrations create exactly 14 empty application tables and constrained indexes', async () => {
   assert.equal(await database.ready(), true);
   const tables = await database.client.$queryRaw`SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename <> '_prisma_migrations'`;
-  assert.equal(tables.length, 13);
+  assert.equal(tables.length, 14);
   for (const { tablename } of tables) {
     const [{ count }] = await database.client.$queryRawUnsafe(`SELECT count(*)::int AS count FROM "${tablename}"`);
     assert.equal(count, 0, tablename);

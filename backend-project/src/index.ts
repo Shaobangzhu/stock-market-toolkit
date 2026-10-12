@@ -2,18 +2,27 @@ import { createApp } from './app.js';
 import { loadConfig, ConfigError } from './config/env.js';
 import { logger } from './utils/logger.js';
 import { createDatabase } from './services/database.js';
+import { providerBudget } from './repositories/provider-budget.js';
+import { TiingoMarketDataProvider } from './providers/tiingo.js';
+import { createMarketDataService } from './services/market-data.js';
 
 // No other module reads process.env. Load dotenv and validate before creating services.
 try {
   const config = loadConfig();
   const database = createDatabase(config);
+  const marketData = database ? createMarketDataService(database.client,
+    new TiingoMarketDataProvider(config, providerBudget(database.client, config))) : undefined;
   const closeDatabase = async () => {
+    try { await marketData?.stop(); } catch {
+      logger.error({ event: 'server_stop_failed' });
+      process.exitCode = 1;
+    }
     try { await database?.close(); } catch {
       logger.error({ event: 'server_stop_failed' });
       process.exitCode = 1;
     }
   };
-  const app = createApp(config, database ? { database } : {});
+  const app = createApp(config, { ...(database ? { database } : {}), ...(marketData ? { marketData } : {}) });
   const server = app.listen(config.PORT, config.HOST, () => {
     logger.info({ event: 'server_started', host: config.HOST, port: config.PORT });
   });
