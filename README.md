@@ -1,6 +1,6 @@
 # Stock Research Lab
 
-Stock Research Lab is a local-only, single-user stock research project. The default home is a complete Watchlist workspace with confirmed adds, optional history imports, persistent status/tags/notes, filtering, sorting and real cached stock previews. The backend includes PostgreSQL/Prisma, Tiingo daily history and SEC EDGAR filings/fundamentals. Full Stock Research page wiring, research generation and approved entry-price methods remain later phases. Opening the app does not create stock records or run provider jobs.
+Stock Research Lab is a local-only, single-user stock research project. The default home is a complete Watchlist workspace with confirmed adds, optional imports, persistent status/tags/notes, filtering and cached previews. Stock Research Overview reads price performance, SEC fundamentals/filings, saved scenarios and embedded research history. PostgreSQL/Prisma persists explicit Tiingo/SEC synchronization. The full Price & Volume workspace, AI generation and approved entry-price methods remain later phases. Opening the app creates no stock records or provider jobs.
 
 ## Run locally
 
@@ -24,7 +24,7 @@ npm run dev
 
 Open the exact URL configured as `FRONTEND_ORIGIN`: the template default is [http://localhost:5173/](http://localhost:5173/), and this machine currently uses [http://127.0.0.1:5173/](http://127.0.0.1:5173/). Vite binds to loopback and proxies `/api` to Express at `127.0.0.1:7001`. Keep one explicit local frontend origin in the ignored backend `.env`; do not widen the whitelist. Backend liveness is `/api/health`; database readiness is `/api/ready`.
 
-The frontend uses BrowserRouter with Vite's SPA fallback. Direct navigation works at `/`, `/stocks/:symbol`, `/stocks/:symbol?tab=price-volume`, `/stocks/:symbol?history=open`, and `/settings`. Entering a symbol opens a research shell; it does not resolve, save, or import a stock yet. See the [frontend foundation](frontend-project/README.md) for scripts and current UI boundaries.
+The frontend uses BrowserRouter with Vite's SPA fallback. Direct navigation works at `/`, `/stocks/:symbol`, `/stocks/:symbol?tab=price-volume`, `/stocks/:symbol?history=open`, and `/settings`. Entering a symbol reads its stored research workspace; unknown stocks show a not-found state without saving/importing anything. See the [frontend foundation](frontend-project/README.md) for scripts and current UI boundaries.
 
 ## Project guidance
 
@@ -37,5 +37,6 @@ The MVP has exactly three external providers: **Tiingo** for daily market prices
 - [Tiingo endpoints, synchronization, and coverage](docs/TIINGO.md)
 - [SEC filings, fundamentals, point-in-time rules, and valuation limits](docs/SEC_EDGAR.md)
 - [Watchlist workflow, APIs, saved-scenario contracts, and validation](docs/WATCHLIST.md)
+- [Stock Research Overview, financial display policies, and validation](docs/STOCK_OVERVIEW.md)
 
 The `assets/` screenshots document the former prototype and are not current product screens. No sign-in, account, trading, or cloud deployment is part of this application.

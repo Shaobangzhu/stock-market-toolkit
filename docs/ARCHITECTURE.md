@@ -140,6 +140,8 @@ Controllers translate HTTP; services implement workflows; repositories own persi
 
 ## 5. Proposed HTTP API boundaries
 
+**Overview implemented:** [Stock Research Overview](STOCK_OVERVIEW.md) documents current cache-only `/api/stocks/:symbol/overview` and `/research` reads, existing fundamentals/filings wiring and explicit synchronization. It supersedes the original stock-page API proposals below; detailed reports, AI generation and scenario writers remain deferred.
+
 Namespace new endpoints under `/api/v1`. Symbols are canonical URL identifiers for the initial US-equity scope; use opaque database IDs internally and provider-specific symbol mappings. Trim/normalize input, preserve share-class meaning, reject ambiguity rather than guess, and URL-encode symbols. Unknown stored instruments return 404; opening a URL must not create an instrument or import data.
 
 | Method / path (under `/api/v1`) | Responsibility / result |

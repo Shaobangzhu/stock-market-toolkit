@@ -68,6 +68,13 @@ export function analyzeFundamentals(observations: FactObservation[], currency: s
   const annual = periods.find((period) => period.periodKind === 'ANNUAL');
   let priceEarnings = { ...missing('ratio', 'MISSING_COMPARABLE_PRICE_AND_EPS'), derived: true, method: 'cached raw close / annual diluted EPS (not TTM)' };
   let priceSales = { ...missing('ratio', 'MISSING_COMPARABLE_MARKET_CAP'), derived: true, method: 'cached raw close * same-date shares outstanding / annual revenue (not TTM)' };
+  let marketCapitalization = { ...missing(currency, 'MISSING_COMPARABLE_PRICE_AND_SHARES'), derived: true, method: 'cached raw close × same-date, published outstanding shares for a single listed class' };
+  if (market && market.freshAtCutoff && market.currency === currency && market.issuerTickerCount === 1) {
+    const shares = pick(observations.filter(row => !row.periodStart && row.periodEnd === market.tradingDate), concepts.sharesOutstanding, 'shares');
+    if (shares.value !== null && new Decimal(shares.value).gt(0) && shares.sources[0]?.issuerTickerCount === 1 && shares.sources[0].availableAt.slice(0, 10) <= market.tradingDate) {
+      marketCapitalization = { ...marketCapitalization, value: new Decimal(market.close).mul(shares.value).toFixed(), reason: null, sources: shares.sources };
+    }
+  }
   if (market && !market.freshAtCutoff) { priceEarnings.reason = 'STALE_MARKET_PRICE'; priceSales.reason = 'STALE_MARKET_PRICE'; }
   if (market && market.freshAtCutoff && annual && market.currency === currency && market.tradingDate >= annual.periodEnd
     && Date.parse(market.tradingDate) - Date.parse(annual.periodEnd) <= 450 * 86400000) {
@@ -77,10 +84,10 @@ export function analyzeFundamentals(observations: FactObservation[], currency: s
     else if (eps.sources[0] && market.tradingDate < eps.sources[0].availableAt.slice(0, 10)) priceEarnings.reason = 'PRICE_PRECEDES_DISCLOSURE';
     else if (eps.value !== null) priceEarnings = { ...priceEarnings, value: new Decimal(market.close).div(eps.value).toDecimalPlaces(12).toFixed(), reason: null, sources: eps.sources };
     const shares = pick(observations.filter((row) => !row.periodStart && row.periodEnd === market.tradingDate), concepts.sharesOutstanding, 'shares');
-    if (shares.value !== null && market.issuerTickerCount === 1 && shares.sources[0]?.issuerTickerCount === 1 && annual.metrics.revenue.value !== null
+    if (shares.value !== null && market.issuerTickerCount === 1 && shares.sources[0]?.issuerTickerCount === 1 && shares.sources[0].availableAt.slice(0, 10) <= market.tradingDate && annual.metrics.revenue.value !== null
       && market.tradingDate >= annual.metrics.revenue.sources[0]!.availableAt.slice(0, 10) && new Decimal(shares.value).gt(0) && new Decimal(annual.metrics.revenue.value).gt(0)) {
       priceSales = { ...priceSales, value: new Decimal(market.close).mul(shares.value).div(annual.metrics.revenue.value).toDecimalPlaces(12).toFixed(), reason: null, sources: [...shares.sources, ...annual.metrics.revenue.sources] };
     }
   }
-  return { methodVersion: 'sec-fundamentals-v1', periods: periods.slice(0, limit), valuation: { priceEarnings, priceSales, marketObservation: market ?? null } };
+  return { methodVersion: 'sec-fundamentals-v1', periods: periods.slice(0, limit), valuation: { priceEarnings, priceSales, marketCapitalization, marketObservation: market ?? null } };
 }

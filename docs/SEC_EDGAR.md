@@ -64,6 +64,8 @@ SEC's current companyfacts API is **not a guaranteed vintage archive**. If SEC c
 
 ## SEC facts versus market-derived valuation
 
+**Overview addition:** `valuation.marketCapitalization` now returns cached RAW price times positive same-date published shares for a matching currency and single listed class, or a missing-data reason. P/S also rejects same-date share facts published after the quote date. [Stock Research Overview](STOCK_OVERVIEW.md) documents the frontend integration and its validation.
+
 SEC does not supply market prices. Valuation combines eligible SEC disclosures with stored **Tiingo RAW daily closes**, never adjusted total-return prices, and does not fetch price data implicitly. Prices must be in the same currency, no older than seven calendar days at the research cutoff, and within 450 days of the annual period end. Current-day EOD availability is conservatively delayed to avoid treating an unpublished close as known.
 
 - P/E is raw close / **annual diluted EPS**, explicitly not TTM. EPS must be positive and known by the quoted trading date; zero/negative earnings return `NON_POSITIVE_EARNINGS`. A single listed class and complete verified cached split-factor coverage between reporting end and quote are required. The existing market calendar verifies only 2026, so most older share-basis checks remain unavailable. Any split, missing corporate-action field, calendar gap or unsupported calendar returns `UNVERIFIED_SHARE_BASIS`.

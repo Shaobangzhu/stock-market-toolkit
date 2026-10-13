@@ -100,6 +100,10 @@ test('market-derived Price/Sales requires positive same-date single-class shares
   const shares = { ...rows[0], id: 'shares', concept: 'EntityCommonStockSharesOutstanding', taxonomy: 'dei', unit: 'shares', value: '100', periodStart: null, periodEnd: '2025-02-21', issuerTickerCount: 1 };
   const market = { close: '20', currency: 'USD', tradingDate: '2025-02-21', provider: 'TIINGO', adjustmentMode: 'RAW', shareBasisVerified: true, freshAtCutoff: true, issuerTickerCount: 1 };
   assert.equal(analyzeFundamentals([...rows, shares], 'USD', 40, market).valuation.priceSales.value, '2');
+  assert.equal(analyzeFundamentals([...rows, shares], 'USD', 40, market).valuation.marketCapitalization.value, '2000');
+  const future = { ...shares, availableAt: '2025-02-22T12:00:00Z' };
+  assert.equal(analyzeFundamentals([...rows, future], 'USD', 40, market).valuation.priceSales.value, null);
+  assert.equal(analyzeFundamentals([...rows, future], 'USD', 40, market).valuation.marketCapitalization.value, null);
   assert.equal(analyzeFundamentals([...rows, { ...shares, issuerTickerCount: 2 }], 'USD', 40, market).valuation.priceSales.value, null);
   assert.equal(analyzeFundamentals(rows, 'USD', 40, { ...market, shareBasisVerified: false }).valuation.priceEarnings.reason, 'UNVERIFIED_SHARE_BASIS');
   assert.equal(analyzeFundamentals(rows, 'USD', 40, { ...market, freshAtCutoff: false }).valuation.priceEarnings.reason, 'STALE_MARKET_PRICE');

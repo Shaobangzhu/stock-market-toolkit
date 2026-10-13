@@ -73,6 +73,8 @@ This prompt milestone follows the Tiingo backend implementation. Prompt numberin
 
 ### 5. Add SEC filings and contextual fundamentals
 
+**Overview frontend implemented:** [Stock Research Overview](STOCK_OVERVIEW.md) wires cached SEC metrics/filing links, price performance, saved scenarios and embedded history. The complete Price & Volume workspace, detailed report reader and research/scenario generation remain later phases.
+
 **Backend implemented:** see [SEC_EDGAR.md](SEC_EDGAR.md) for endpoints, selected US-GAAP/DEI concepts, annual/quarterly/YTD separation, amendment/cutoff rules, derived FCF/margins and conservative annual valuation. Existing schema is reused without seeds. Frontend integration, issuer-specific fiscal-calendar policies, TTM and broader concept/IFRS coverage remain future work.
 
 - Resolve issuer CIK and share-class relationships on demand. Fetch submissions/companyfacts through the backend with a real contact User-Agent and shared conservative rate limit.

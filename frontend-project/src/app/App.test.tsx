@@ -3,6 +3,8 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 import { MAIN_NAV_ITEMS } from '../components/Sidebar';
+import { fundamentalsFixture, overviewFixture } from '../features/stocks/StockResearch.fixtures';
+vi.mock('../features/stocks/PricePerformanceChart', () => ({ PricePerformanceChart: () => <div role="img" aria-label="Historical price performance chart" /> }));
 
 const requests: string[] = [];
 
@@ -11,6 +13,11 @@ beforeEach(() => {
   requests.length = 0;
   vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
     requests.push(String(input));
+    const path = String(input), symbol = path.split('/')[3] ?? 'TEST';
+    if (path.includes('/overview?')) return { ok: true, status: 200, json: async () => ({ data: overviewFixture(symbol) }) };
+    if (path.includes('/fundamentals?')) return { ok: true, status: 200, json: async () => ({ data: fundamentalsFixture(symbol) }) };
+    if (path.includes('/filings?')) return { ok: true, status: 200, json: async () => ({ data: { symbol, filings: [] } }) };
+    if (path.includes('/research?')) return { ok: true, status: 200, json: async () => ({ data: { records: [] } }) };
     if (String(input) === '/api/ready') {
       return { ok: true, status: 200, json: async () => ({ data: { status: 'ready', database: 'ok' } }) };
     }
@@ -42,7 +49,7 @@ describe('navigation and initial data boundaries', () => {
     await user.click(screen.getByRole('button', { name: 'Open stock research' }));
     expect(window.location.pathname).toBe('/stocks/AAPL');
     expect(await screen.findByRole('heading', { name: 'AAPL' })).toBeInTheDocument();
-    expect(requests.every(path => path.startsWith('/api/watchlist?'))).toBe(true);
+    expect(requests.every(path => path.startsWith('/api/watchlist?') || path.startsWith('/api/stocks/AAPL/'))).toBe(true);
   });
 
   it('keeps the stock header while switching exactly two tabs by query parameter', async () => {
@@ -52,12 +59,12 @@ describe('navigation and initial data boundaries', () => {
     expect(await screen.findByRole('heading', { name: 'TEST' })).toBeInTheDocument();
     expect(screen.getAllByRole('tab')).toHaveLength(2);
     expect(screen.getByRole('tab', { name: 'Price & Volume' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByText('No price history yet')).toBeInTheDocument();
+    expect(screen.getByText('Price & Volume workspace')).toBeInTheDocument();
     await user.click(screen.getByRole('tab', { name: 'Overview' }));
     expect(window.location.search).toBe('');
     expect(screen.getByRole('heading', { name: 'TEST' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Research History' })).toBeInTheDocument();
-    expect(requests).toEqual([]);
+    expect(requests.every(path => path.startsWith('/api/stocks/TEST/'))).toBe(true);
   });
 
   it('opens embedded research history from a direct URL and closes without losing stock context', async () => {
@@ -69,7 +76,7 @@ describe('navigation and initial data boundaries', () => {
     await waitFor(() => expect(window.location.pathname).toBe('/stocks/TEST'));
     expect(window.location.search).toBe('');
     expect(screen.getByRole('heading', { name: 'TEST' })).toBeInTheDocument();
-    expect(requests).toEqual([]);
+    expect(requests.every(path => path.startsWith('/api/stocks/TEST/'))).toBe(true);
   });
 
   it('normalizes unsupported tabs to Overview and rejects invalid symbols', async () => {

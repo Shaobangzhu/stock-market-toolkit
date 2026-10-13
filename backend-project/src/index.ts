@@ -9,6 +9,7 @@ import { SecEdgarProvider } from './providers/sec-edgar.js';
 import { secAdmission } from './repositories/sec.js';
 import { createSecService } from './services/sec.js';
 import { createWatchlistService } from './services/watchlist.js';
+import { createStockOverviewService } from './services/stock-overview.js';
 
 // No other module reads process.env. Load dotenv and validate before creating services.
 try {
@@ -17,6 +18,7 @@ try {
   const tiingo = database ? new TiingoMarketDataProvider(config, providerBudget(database.client, config)) : undefined;
   const marketData = database && tiingo ? createMarketDataService(database.client, tiingo) : undefined;
   const watchlist = database && tiingo && marketData ? createWatchlistService(database.client, tiingo, marketData) : undefined;
+  const stockOverview = database ? createStockOverviewService(database.client) : undefined;
   const sec = database ? createSecService(database.client, new SecEdgarProvider(config, { admission: secAdmission(database.client, config.SEC_EDGAR_MAX_RPS) })) : undefined;
   const closeDatabase = async () => {
     try { await sec?.stop(); } catch {
@@ -32,7 +34,7 @@ try {
       process.exitCode = 1;
     }
   };
-  const app = createApp(config, { ...(database ? { database } : {}), ...(marketData ? { marketData } : {}), ...(sec ? { sec } : {}), ...(watchlist ? { watchlist } : {}) });
+  const app = createApp(config, { ...(database ? { database } : {}), ...(marketData ? { marketData } : {}), ...(sec ? { sec } : {}), ...(watchlist ? { watchlist } : {}), ...(stockOverview ? { stockOverview } : {}) });
   const server = app.listen(config.PORT, config.HOST, () => {
     logger.info({ event: 'server_started', host: config.HOST, port: config.PORT });
   });

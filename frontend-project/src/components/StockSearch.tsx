@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Button, Input } from 'antd';
 import { ArrowRightOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-
-const symbolPattern = /^[A-Z0-9][A-Z0-9.^-]{0,31}$/;
+import { normalizeStockSymbol } from '../api/stocks';
 
 export function StockSearch() {
   const [value, setValue] = useState('');
@@ -12,8 +11,8 @@ export function StockSearch() {
 
   function openSymbol(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const symbol = value.trim().toUpperCase();
-    if (!symbolPattern.test(symbol)) { setInvalid(true); return; }
+    const symbol = normalizeStockSymbol(value);
+    if (!symbol) { setInvalid(true); return; }
     setInvalid(false);
     navigate(`/stocks/${encodeURIComponent(symbol)}`);
     setValue('');

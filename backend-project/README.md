@@ -19,13 +19,15 @@ Supported fields: `NODE_ENV`, `HOST`, `PORT`, `FRONTEND_ORIGIN`, `DATABASE_URL`,
 
 ## API and local request protection
 
+Stock Research adds cache-only Overview and completed-history endpoints. See [Stock Research Overview](../docs/STOCK_OVERVIEW.md) for request limits, price statistics, SEC valuation comparability and deferred capabilities. These endpoints reuse existing storage without schema migration or provider calls on reads.
+
 `GET /api/health` returns HTTP 200:
 
 ```json
 {"data":{"status":"ok","application":"Stock Research Lab"}}
 ```
 
-This is liveness only: it does not check PostgreSQL/provider availability, expose configuration, or write data. It accepts no query parameters or body. HEAD is supported; other non-OPTIONS methods return 405 after the local write checks. Unknown endpoints return 404. Authentication and legacy JSON-data endpoints are removed. Implemented endpoints use the explicitly requested `/api` namespace; Tiingo price/sync/status routes are documented in [TIINGO.md](../docs/TIINGO.md). Watchlist/settings business APIs remain later phases.
+This is liveness only: it does not check PostgreSQL/provider availability, expose configuration, or write data. It accepts no query parameters or body. HEAD is supported; other non-OPTIONS methods return 405 after the local write checks. Unknown endpoints return 404. Authentication and legacy JSON-data endpoints are removed. Implemented endpoints use `/api`; see [Tiingo](../docs/TIINGO.md), [SEC EDGAR](../docs/SEC_EDGAR.md), [Watchlist](../docs/WATCHLIST.md) and [Stock Research Overview](../docs/STOCK_OVERVIEW.md). Settings business APIs remain a later phase.
 
 All future POST/PUT/PATCH/DELETE requests must include:
 
