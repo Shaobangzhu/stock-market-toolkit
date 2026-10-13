@@ -19,12 +19,17 @@ export async function getApiJson<T>(
   decode: (value: unknown) => T,
   signal?: AbortSignal,
 ): Promise<T> {
-  if (path.includes('://') || path.includes('..')) throw new Error('Invalid API path.');
+  return requestApiJson('GET', path, decode, undefined, signal);
+}
+
+export async function requestApiJson<T>(method: 'GET' | 'POST' | 'PATCH' | 'DELETE', path: `/api/${string}`, decode: (value: unknown) => T, body?: unknown, signal?: AbortSignal): Promise<T> {
+  if (path.includes('://') || path.split('?')[0]?.includes('..')) throw new Error('Invalid API path.');
   const response = await fetch(path, {
-    method: 'GET',
+    method,
     signal,
     credentials: 'omit',
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'application/json', ...(method !== 'GET' ? { 'Content-Type': 'application/json', 'X-Stock-Research-Lab': '1' } : {}) },
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
   const payload: unknown = await response.json().catch(() => undefined);
   if (!response.ok) {

@@ -90,6 +90,8 @@ Retain the repository, two app-root directories, TypeScript, Express, Ant Design
 
 ## 4. Target architecture and technical decisions
 
+**Watchlist implemented:** [WATCHLIST.md](WATCHLIST.md) documents the `/api/watchlist` and explicit instrument search/resolve contracts, separate retained annotations, bounded consistent cached reads and scenario projection rules. The user-provided UI references guide layout/visuals; their example data/provider counts do not enter runtime state. No Dashboard or new navigation destination is added.
+
 Use a small modular monolith: a React SPA, one Express backend process, and local PostgreSQL in the existing Docker installation. No microservices, Redis, external queue service, or cloud resources.
 
 ```text

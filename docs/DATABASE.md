@@ -73,13 +73,14 @@ Stop/restart only this service. Do not use volume deletion, volume pruning, or r
 
 ## Schema contracts
 
-The source of truth is `backend-project/prisma/schema.prisma` plus reviewed SQL migrations. All **14** application tables begin empty. Enums are schema objects, not seeded lookup rows. The Tiingo migration adds `ProviderRequestUsage` for quota accounting, original numeric fields/corporate actions on `PriceBar`, and result snapshots on sync jobs.
+The source of truth is `backend-project/prisma/schema.prisma` plus reviewed SQL migrations. All **15** application tables begin empty. Enums are schema objects, not seeded lookup rows. The Tiingo migration adds quota accounting and corporate-action fields; the schema-only [Watchlist migration](WATCHLIST.md) adds retained annotation storage without domain inserts.
 
 | Entity | Important boundaries |
 | --- | --- |
 | `Issuer` | Unique padded 10-digit CIK; shared by multiple listings. |
 | `Instrument` | Unique **(symbol, exchange)**; uppercase canonical identity, currency, valid exchange timezone, optional issuer. Symbol alone is not an unambiguous identifier. |
 | `WatchlistEntry` | Unique instrument; deleting membership retains instrument/history. |
+| `WatchlistDetails` | Unique instrument; manual Watching/Researching/Waiting for Entry/Archived status, bounded tags/notes and optimistic revision. Survives membership removal; no startup default record. |
 | `PriceBar` | Unique instrument/provider/interval/adjustment/timestamp; date, currency, timezone, retrieval instant, content hash and revision retained. Raw/split/total-return series are separate records. |
 | `SecFiling` | Unique accession; issuer, form, filing date, optional acceptance instant/reporting period, document URL, amendment flag. |
 | `CompanyFact` | Exact value with taxonomy/concept/unit/context and instant/duration periods. Filing accession distinguishes restatements. Composite FK prevents assigning a filing to the wrong issuer. No separate FundamentalSnapshot table is needed. |
@@ -97,7 +98,7 @@ Instants use `timestamptz(3)` and the connection timezone is UTC. Session/report
 
 SQL adds checks for coherent positive OHLC, nonnegative/integer raw volume, finite decimals, reporting periods, daily date identity, currency/hash formats, valid timezone names, version numbers and terminal job states. Foreign keys restrict destructive deletion. Indexes cover price series, instrument/date history, issuer/report periods, status queues, research history and foreign keys. Triggers preserve saved research/source/note/scenario history; changing a saved result requires a new version.
 
-Instrument/watchlist and price repository foundations plus Tiingo workflows and quota/job admission are implemented. Full research/fundamental repositories, supported metrics, retention, multi-provider mappings and entry methodology belong to later phases. `priceRepository.save` remains a low-level exact-string writer; the Tiingo bulk upsert increments revisions only when source content changes. These current observations are not a full point-in-time price archive; research reports preserve input snapshots.
+Watchlist operations, Tiingo workflows and SEC filings/fundamentals are implemented. Research generation, approved entry methodology and broader retention controls remain future work; Tiingo remains the sole market-price provider. `priceRepository.save` remains a low-level exact-string writer; the Tiingo bulk upsert increments revisions only when source content changes. These current observations are not a full point-in-time price archive; research reports preserve input snapshots.
 
 ## Migration and validation
 
@@ -114,7 +115,7 @@ npm run test:integration
 npm run test:integration -- --restart
 ```
 
-The integration runner verifies the exact Compose project/service and loopback mapping before creating a cryptographically random `srl_test_<24 hex>` database. It replays the migration from empty, runs repository/constraint tests, and drops **only the database created by that invocation**. It never resets or inserts fixtures into `stock_research_lab`. If creation fails because a name exists, cleanup does not run. Test cases use rolled-back transactions. The optional restart check persists a test-only marker, closes its client, restarts `srl-postgres`, reconnects and verifies the marker before test-database cleanup.
+The integration runner verifies the exact Compose project/service and loopback mapping before creating a cryptographically random `srl_test_<24 hex>` database. It replays all migrations, runs tests, and drops **only the database created by that invocation**. It never resets or inserts fixtures into `stock_research_lab`. If creation fails because a name exists, cleanup does not run. Foundation tests roll back; provider tests clean their guarded fixtures; Watchlist tests truncate only named disposable-fixture tables because completed reports/scenarios reject DELETE. A temporary backend-process restart verifies Watchlist persistence without restarting the personal service. The optional `--restart` check separately restarts only `srl-postgres` with a test-only persistence marker.
 
 `GET /api/health` is liveness. `GET /api/ready` returns 200 only when the database connection and all application tables are accessible; otherwise 503 with `DATABASE_UNAVAILABLE`. Readiness performs no writes and reveals no connection URL or driver error. One lazy Prisma/pg pool serves the backend (max 5 connections; 2-second connect timeout, 3-second statement timeout, 4-second query timeout). SIGINT/SIGTERM close HTTP first, disconnect Prisma, and enforce a 10-second shutdown deadline. Missing database configuration leaves liveness working and readiness unavailable.
 

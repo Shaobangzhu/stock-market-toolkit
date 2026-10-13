@@ -14,30 +14,35 @@ beforeEach(() => {
     if (String(input) === '/api/ready') {
       return { ok: true, status: 200, json: async () => ({ data: { status: 'ready', database: 'ok' } }) };
     }
+    if (String(input).startsWith('/api/watchlist?')) {
+      return { ok: true, status: 200, json: async () => ({ data: { items: [], total: 0, filteredCount: 0, availableTags: [], asOf: '2026-01-07T00:00:00Z', summary: { tracked: 0, archived: 0, nearEntry: 0, researched: 0, priced: 0, fresh: 0 } } }) };
+    }
     throw new Error('Unexpected API request');
   }));
 });
 
 describe('navigation and initial data boundaries', () => {
-  it('shows exactly three main navigation items and a polished empty Watchlist', () => {
+  it('shows exactly three main navigation items and a polished empty Watchlist', async () => {
     render(<App />);
     const nav = screen.getByRole('navigation', { name: 'Main navigation' });
     expect(MAIN_NAV_ITEMS).toEqual(['Watchlist', 'Stock Research', 'Data & Settings']);
     expect(nav.children).toHaveLength(3);
     for (const label of MAIN_NAV_ITEMS) expect(within(nav).getByText(label)).toBeInTheDocument();
-    expect(screen.getByText('Your watchlist starts here')).toBeInTheDocument();
+    expect(await screen.findByText('Your Watchlist Is Empty')).toBeInTheDocument();
     expect(screen.queryByText(/PLTR|SOFI|UBER|FIG/)).not.toBeInTheDocument();
-    expect(requests).toEqual([]);
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatch(/^\/api\/watchlist\?/);
   });
 
   it('opens a typed symbol without making authentication or provider requests', async () => {
     const user = userEvent.setup();
     render(<App />);
+    await screen.findByText('Your Watchlist Is Empty');
     await user.type(screen.getByRole('textbox', { name: 'Open stock symbol' }), 'aapl');
     await user.click(screen.getByRole('button', { name: 'Open stock research' }));
     expect(window.location.pathname).toBe('/stocks/AAPL');
     expect(await screen.findByRole('heading', { name: 'AAPL' })).toBeInTheDocument();
-    expect(requests).toEqual([]);
+    expect(requests.every(path => path.startsWith('/api/watchlist?'))).toBe(true);
   });
 
   it('keeps the stock header while switching exactly two tabs by query parameter', async () => {

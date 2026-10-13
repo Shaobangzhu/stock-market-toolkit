@@ -46,6 +46,13 @@ enum RunStatus {
   INTERRUPTED
 }
 
+enum WatchlistResearchStatus {
+  WATCHING
+  RESEARCHING
+  WAITING_FOR_ENTRY
+  ARCHIVED
+}
+
 // Issuers are separate because multiple listings/share classes can share one CIK.
 model Issuer {
   id          String        @id @default(uuid()) @db.Uuid
@@ -69,6 +76,7 @@ model Instrument {
   createdAt        DateTime            @default(now()) @db.Timestamptz(3)
   updatedAt        DateTime            @updatedAt @db.Timestamptz(3)
   watchlistEntry   WatchlistEntry?
+  watchlistDetails WatchlistDetails?
   priceBars        PriceBar[]
   syncJobs         ProviderSyncJob[]
   syncStates       ProviderSyncState[]
@@ -87,6 +95,21 @@ model WatchlistEntry {
   addedAt      DateTime   @default(now()) @db.Timestamptz(3)
 
   @@index([addedAt])
+}
+
+// Personal annotations survive membership removal. Created only by explicit add/edit.
+model WatchlistDetails {
+  id             String                  @id @default(uuid()) @db.Uuid
+  instrumentId   String                  @unique @db.Uuid
+  instrument     Instrument              @relation(fields: [instrumentId], references: [id], onDelete: Restrict)
+  researchStatus WatchlistResearchStatus @default(WATCHING)
+  tags           String[]                @default([])
+  notes          String                  @default("") @db.Text
+  revision       Int                     @default(1)
+  createdAt      DateTime                @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime                @updatedAt @db.Timestamptz(3)
+
+  @@index([researchStatus])
 }
 
 model PriceBar {

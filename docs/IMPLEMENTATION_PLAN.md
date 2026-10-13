@@ -41,6 +41,8 @@ This plan authorizes no implementation by itself. The current phase creates thos
 
 ### 3. Deliver Watchlist and the required navigation
 
+**Implemented:** [Watchlist workspace](WATCHLIST.md) provides the requested empty state, explicit search/identity confirmation, membership CRUD, retained annotations, filtering/sorting, cached price/scenario/report projections and selected-stock navigation. Optional historical sync is explicit. Full Stock Research business wiring and approved scenario creation remain future work.
+
 - Build the Ant Design shell with only Watchlist and Data & Settings as top-level destinations. Stock Research is reached from a selected stock and has Overview/Price & Volume tabs plus embedded Research History.
 - Implement symbol resolution through a bounded provider adapter. Resolve initial US-equity identity and share-class formatting explicitly; searches do not persist results. Do not ship a stock catalog or examples as application data.
 - Implement watchlist add/read/remove and stored stock identity endpoints. Add only user-selected identities. Reject duplicates/ambiguous matches and preserve historical data on membership removal.

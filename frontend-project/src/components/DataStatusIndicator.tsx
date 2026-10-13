@@ -2,7 +2,7 @@ export type DataStatus = 'none' | 'fresh' | 'stale' | 'unavailable';
 
 const labels: Record<DataStatus, string> = {
   none: 'No market data yet',
-  fresh: 'Market data current',
+  fresh: 'Market data cached',
   stale: 'Market data needs refresh',
   unavailable: 'Market data unavailable',
 };

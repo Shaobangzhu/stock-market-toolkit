@@ -8,6 +8,7 @@ import { logger, type Logger } from './utils/logger.js';
 import type { DatabaseHealth } from './services/database.js';
 import type { MarketDataService } from './services/market-data.js';
 import type { SecService } from './services/sec.js';
+import type { WatchlistService } from './services/watchlist.js';
 
 export interface AppOptions {
   router?: Router;
@@ -15,6 +16,7 @@ export interface AppOptions {
   database?: DatabaseHealth;
   marketData?: MarketDataService;
   sec?: SecService;
+  watchlist?: WatchlistService;
 }
 
 export function createApp(config: AppConfig, options: AppOptions = {}) {
@@ -27,7 +29,7 @@ export function createApp(config: AppConfig, options: AppOptions = {}) {
   app.use(localAccess(config));
   app.use(express.json({ limit: '32kb', strict: true, inflate: false }));
   app.use(express.urlencoded({ extended: false, limit: '32kb', parameterLimit: 100, inflate: false }));
-  app.use('/api', options.router ?? createApiRouter(options.database, options.marketData, options.sec));
+  app.use('/api', options.router ?? createApiRouter(options.database, options.marketData, options.sec, options.watchlist));
   app.use(notFound);
   app.use(errorHandler(options.logger ?? logger));
   return app;

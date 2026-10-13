@@ -45,4 +45,6 @@ The database foundation, Tiingo daily history and SEC EDGAR filings/fundamentals
 
 ## PostgreSQL foundation
 
+The complete [Watchlist workspace](../docs/WATCHLIST.md) adds cache reads, protected explicit search/resolve/add/edit/remove APIs and optional Tiingo history sync. Membership is separate from retained instrument annotations; price/research inputs are read from existing persisted entities. Apply the schema-only third migration before starting the updated backend. No seeds or provider calls run at startup.
+
 See [database operations and schema contracts](../docs/DATABASE.md). Use `npm run db:migrate` before startup and `npm run db:status` to inspect migration state. `GET /api/ready` checks database readiness; `/api/health` remains liveness. `npm run test:integration` runs against a newly created isolated test database. No startup seed/import runs. Database credentials remain in ignored local environment files.

@@ -43,6 +43,7 @@ export interface NormalizedPrice {
 export interface MarketDataProvider {
   readonly name: MarketProviderName;
   readonly configured: boolean;
+  searchInstruments?(query: string): Promise<{ symbol: string; name: string }[]>;
   resolveInstrument(symbol: string): Promise<NormalizedInstrument>;
   getDailyHistory(symbol: string, from: string, to: string): Promise<NormalizedPrice[]>;
   getLatestEod(symbol: string): Promise<NormalizedPrice[]>;

@@ -1,4 +1,5 @@
 import { setTimeout as sleep } from 'node:timers/promises';
+import { z } from 'zod';
 import type { AppConfig } from '../config/env.js';
 import { canonicalSymbol, dateSchema, ProviderError, invalidPayload, type MarketDataProvider } from './market-data.js';
 import { normalizeInstrument, normalizePrices, parseProviderJson } from './tiingo-normalization.js';
@@ -24,6 +25,7 @@ export class TiingoMarketDataProvider implements MarketDataProvider {
   private readonly now: () => Date;
   private readonly timeoutMs: number;
   private authBlocked = false;
+  private searchBlocked = false;
   private cooldown?: Date;
   private tail: Promise<unknown> = Promise.resolve();
   private stopped = false;
@@ -42,6 +44,19 @@ export class TiingoMarketDataProvider implements MarketDataProvider {
     const canonical = canonicalSymbol(symbol);
     return normalizeInstrument(await this.request(canonical, false), canonical);
   }
+  async searchInstruments(query: string) {
+    if (!query.trim() || query.length > 100 || /[\x00-\x1f\x7f]/.test(query)) throw new ProviderError(400, 'VALIDATION_ERROR', 'Enter a ticker or company name.');
+    const payload = await this.request('SEARCH', false, { query: query.trim() }, 'search');
+    const rows = z.array(z.object({ ticker: z.string(), name: z.string().min(1).max(256), assetType: z.string(), isActive: z.boolean() })).max(1000).safeParse(payload);
+    if (!rows.success) throw invalidPayload();
+    const result = new Map<string, { symbol: string; name: string }>();
+    for (const row of rows.data) {
+      if (!row.isActive || row.assetType.toLowerCase() !== 'stock') continue;
+      try { const symbol = canonicalSymbol(row.ticker); result.set(symbol, { symbol, name: row.name }); } catch { /* Ignore unsupported directory symbol formats. */ }
+      if (result.size === 20) break;
+    }
+    return [...result.values()];
+  }
   async getDailyHistory(symbol: string, from: string, to: string) {
     if (!dateSchema.safeParse(from).success || !dateSchema.safeParse(to).success || from > to) {
       throw new ProviderError(400, 'VALIDATION_ERROR', 'Invalid daily history date range.');
@@ -59,19 +74,20 @@ export class TiingoMarketDataProvider implements MarketDataProvider {
     for (const controller of this.controllers) controller.abort();
   }
 
-  private request(symbol: string, prices: boolean, query: Record<string, string> = {}): Promise<unknown> {
+  private request(symbol: string, prices: boolean, query: Record<string, string> = {}, resource: 'daily' | 'search' = 'daily'): Promise<unknown> {
     // One outbound request at a time, shared by every job and metadata lookup.
-    const result = this.tail.then(() => this.send(symbol, prices, query));
+    const result = this.tail.then(() => this.send(symbol, prices, query, resource));
     this.tail = result.catch(() => undefined);
     return result;
   }
 
-  private async send(symbol: string, prices: boolean, query: Record<string, string>): Promise<unknown> {
+  private async send(symbol: string, prices: boolean, query: Record<string, string>, resource: 'daily' | 'search'): Promise<unknown> {
     if (this.stopped) throw new ProviderError(503, 'PROVIDER_UNAVAILABLE', 'The market-data worker is stopping.');
     if (!this.token) throw new ProviderError(503, 'PROVIDER_NOT_CONFIGURED', 'Configure TIINGO_API_KEY in the backend environment file.');
     if (this.authBlocked) throw new ProviderError(503, 'PROVIDER_AUTH_FAILED', 'Tiingo credentials were rejected. Correct the backend key and restart the backend.');
+    if (resource === 'search' && this.searchBlocked) throw new ProviderError(503, 'PROVIDER_AUTH_FAILED', 'Tiingo search permissions were rejected. Exact ticker resolution may still be available.');
     if (this.cooldown && this.cooldown > this.now()) throw new ProviderError(429, 'PROVIDER_RATE_LIMITED', 'Tiingo requests are temporarily paused.', this.cooldown);
-    const url = new URL(`https://api.tiingo.com/tiingo/daily/${encodeURIComponent(symbol)}${prices ? '/prices' : ''}`);
+    const url = new URL(resource === 'search' ? 'https://api.tiingo.com/tiingo/utilities/search' : `https://api.tiingo.com/tiingo/daily/${encodeURIComponent(symbol)}${prices ? '/prices' : ''}`);
     url.search = new URLSearchParams({ format: 'json', ...query }).toString();
     for (let attempt = 0; attempt < 3; attempt++) {
       if (this.stopped) throw new ProviderError(503, 'PROVIDER_UNAVAILABLE', 'The market-data worker is stopping.');
@@ -87,8 +103,13 @@ export class TiingoMarketDataProvider implements MarketDataProvider {
         const response = await this.transport(url, { method: 'GET', headers: { Authorization: `Token ${this.token}`, Accept: 'application/json' }, redirect: 'error', signal: controller.signal });
         const status = response.status;
         if (status === 401 || status === 403) {
-          this.authBlocked = true;
-          failure = new ProviderError(503, 'PROVIDER_AUTH_FAILED', 'Tiingo credentials or EOD permissions were rejected. Check backend configuration.');
+          if (resource === 'search' && status === 403) {
+            this.searchBlocked = true;
+            failure = new ProviderError(503, 'PROVIDER_AUTH_FAILED', 'Tiingo search permissions were rejected. Try exact ticker resolution.');
+          } else {
+            this.authBlocked = true;
+            failure = new ProviderError(503, 'PROVIDER_AUTH_FAILED', 'Tiingo credentials or EOD permissions were rejected. Check backend configuration.');
+          }
         } else if (status === 404 || status === 400) {
           failure = new ProviderError(404, 'INVALID_SYMBOL', 'Tiingo does not support this stock symbol.');
         } else if (status === 429) {
