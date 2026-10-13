@@ -1,6 +1,6 @@
 # Stock Research Lab
 
-Stock Research Lab is a local-only, single-user stock research project. The current implementation has an Express API, PostgreSQL/Prisma persistence, a Tiingo daily-history backend, and a React frontend shell. Explicit API syncs can import market data; Watchlist persistence, frontend data wiring, research generation and entry-price calculations are later phases. Opening the app does not create stock records or run provider jobs.
+Stock Research Lab is a local-only, single-user stock research project. The current implementation has an Express API, PostgreSQL/Prisma persistence, Tiingo daily history, SEC EDGAR filings/fundamentals, and a React frontend shell. Explicit API syncs can import market and SEC data; Watchlist persistence, frontend data wiring, research generation and entry-price calculations are later phases. Opening the app does not create stock records or run provider jobs.
 
 ## Run locally
 
@@ -35,5 +35,6 @@ The MVP has exactly three external providers: **Tiingo** for daily market prices
 - [Backend API and configuration](backend-project/README.md)
 - [Database setup, migrations, and backup](docs/DATABASE.md)
 - [Tiingo endpoints, synchronization, and coverage](docs/TIINGO.md)
+- [SEC filings, fundamentals, point-in-time rules, and valuation limits](docs/SEC_EDGAR.md)
 
 The `assets/` screenshots document the former prototype and are not current product screens. No sign-in, account, trading, or cloud deployment is part of this application.

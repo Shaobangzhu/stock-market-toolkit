@@ -5,6 +5,9 @@ import { createDatabase } from './services/database.js';
 import { providerBudget } from './repositories/provider-budget.js';
 import { TiingoMarketDataProvider } from './providers/tiingo.js';
 import { createMarketDataService } from './services/market-data.js';
+import { SecEdgarProvider } from './providers/sec-edgar.js';
+import { secAdmission } from './repositories/sec.js';
+import { createSecService } from './services/sec.js';
 
 // No other module reads process.env. Load dotenv and validate before creating services.
 try {
@@ -12,7 +15,12 @@ try {
   const database = createDatabase(config);
   const marketData = database ? createMarketDataService(database.client,
     new TiingoMarketDataProvider(config, providerBudget(database.client, config))) : undefined;
+  const sec = database ? createSecService(database.client, new SecEdgarProvider(config, { admission: secAdmission(database.client, config.SEC_EDGAR_MAX_RPS) })) : undefined;
   const closeDatabase = async () => {
+    try { await sec?.stop(); } catch {
+      logger.error({ event: 'server_stop_failed' });
+      process.exitCode = 1;
+    }
     try { await marketData?.stop(); } catch {
       logger.error({ event: 'server_stop_failed' });
       process.exitCode = 1;
@@ -22,7 +30,7 @@ try {
       process.exitCode = 1;
     }
   };
-  const app = createApp(config, { ...(database ? { database } : {}), ...(marketData ? { marketData } : {}) });
+  const app = createApp(config, { ...(database ? { database } : {}), ...(marketData ? { marketData } : {}), ...(sec ? { sec } : {}) });
   const server = app.listen(config.PORT, config.HOST, () => {
     logger.info({ event: 'server_started', host: config.HOST, port: config.PORT });
   });

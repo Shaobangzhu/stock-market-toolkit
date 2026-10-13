@@ -193,7 +193,7 @@ export function createMarketDataService(db: PrismaClient, provider: MarketDataPr
     async stop() { stopping = true; provider.shutdown?.(); await queue; },
     async getJob(id: string) {
       const job = await db.providerSyncJob.findUnique({ where: { id } });
-      if (!job || job.provider !== 'TIINGO' || job.dataset !== 'PRICES') throw new HttpError(404, 'NOT_FOUND', 'Sync job not found.');
+      if (!job || !((job.provider === 'TIINGO' && job.dataset === 'PRICES') || (job.provider === 'SEC_EDGAR' && job.dataset === 'FUNDAMENTALS'))) throw new HttpError(404, 'NOT_FOUND', 'Sync job not found.');
       return serializeJob(job);
     },
     async getPrices(symbol: string, query: PriceQuery) {

@@ -4,7 +4,7 @@ Baseline date: 2026-10-11 (America/Los_Angeles). Based on the audited commit and
 
 This plan authorizes no implementation by itself. The current phase creates those four documents only. No application code, dependencies, lockfiles, legacy data, services, or database state is changed. Later implementation prompts should name a phase and satisfy its exit gate before moving on.
 
-**Progress:** the backend-only Phase 1 refactor is recorded in [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md). PostgreSQL/Prisma foundation is implemented; see [DATABASE.md](DATABASE.md) and [validation record](DATABASE_VALIDATION.md). The frontend uses React 19, Vite, Ant Design, ECharts, BrowserRouter and the required three-item navigation; see [frontend setup](../frontend-project/README.md). [Tiingo backend history and jobs](TIINGO.md) now implement explicit first/incremental imports and cached price reads. Watchlist operations, frontend data wiring, other providers, entry-price calculations and built-SPA serving remain future work. Legacy JSON files were deleted without migration or backups as authorized.
+**Progress:** the backend-only Phase 1 refactor is recorded in [PHASE_1_BACKEND.md](PHASE_1_BACKEND.md). PostgreSQL/Prisma foundation is implemented; see [DATABASE.md](DATABASE.md) and [validation record](DATABASE_VALIDATION.md). The frontend uses React 19, Vite, Ant Design, ECharts, BrowserRouter and the required three-item navigation; see [frontend setup](../frontend-project/README.md). [Tiingo backend history and jobs](TIINGO.md) implement explicit first/incremental imports and cached price reads. [SEC filings/fundamentals](SEC_EDGAR.md) implement explicit submissions/companyfacts sync, publication-cutoff reads and conservative deterministic metrics. Watchlist operations, frontend data wiring, OpenAI research, entry-price calculations and built-SPA serving remain future work. Legacy JSON files were deleted without migration or backups as authorized.
 
 ## Implementation sequence
 
@@ -70,6 +70,8 @@ This prompt milestone follows the Tiingo backend implementation. Prompt numberin
 **Exit gate:** current MVP documentation and templates contain only the approved providers; environment secrets remain ignored and preserved; configuration/startup and existing Tiingo regression checks pass. No provider feature, Docker or database changes.
 
 ### 5. Add SEC filings and contextual fundamentals
+
+**Backend implemented:** see [SEC_EDGAR.md](SEC_EDGAR.md) for endpoints, selected US-GAAP/DEI concepts, annual/quarterly/YTD separation, amendment/cutoff rules, derived FCF/margins and conservative annual valuation. Existing schema is reused without seeds. Frontend integration, issuer-specific fiscal-calendar policies, TTM and broader concept/IFRS coverage remain future work.
 
 - Resolve issuer CIK and share-class relationships on demand. Fetch submissions/companyfacts through the backend with a real contact User-Agent and shared conservative rate limit.
 - Decide supported filing forms and metrics before normalization. Store accession, period/unit/concept, accepted/filed dates, source URLs, and amendments/restatements.
