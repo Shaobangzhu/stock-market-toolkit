@@ -1,6 +1,6 @@
 # Stock Research Lab
 
-Stock Research Lab is a local-only, single-user stock research project. The default home is a complete Watchlist workspace with confirmed adds, optional imports, persistent status/tags/notes, filtering and cached previews. Stock Research Overview reads price performance, SEC fundamentals/filings, saved scenarios and embedded research history. PostgreSQL/Prisma persists explicit Tiingo/SEC synchronization. The full Price & Volume workspace, AI generation and approved entry-price methods remain later phases. Opening the app creates no stock records or provider jobs.
+Stock Research Lab is a local-only, single-user stock research project. The default home is a complete Watchlist workspace with confirmed adds, optional imports, persistent status/tags/notes, filtering and cached previews. Stock Research Overview reads price performance, SEC fundamentals/filings, saved scenarios and embedded research history. Price & Volume provides daily candles/lines, linked volume, deterministic indicators, date navigation and saved event/entry annotations. PostgreSQL/Prisma persists explicit Tiingo/SEC synchronization. AI generation, detailed report reading and approved entry-price methods remain later phases. Opening the app creates no stock records or provider jobs.
 
 ## Run locally
 
@@ -38,5 +38,6 @@ The MVP has exactly three external providers: **Tiingo** for daily market prices
 - [SEC filings, fundamentals, point-in-time rules, and valuation limits](docs/SEC_EDGAR.md)
 - [Watchlist workflow, APIs, saved-scenario contracts, and validation](docs/WATCHLIST.md)
 - [Stock Research Overview, financial display policies, and validation](docs/STOCK_OVERVIEW.md)
+- [Price & Volume controls, indicator formulas, event provenance, and validation](docs/PRICE_VOLUME.md)
 
 The `assets/` screenshots document the former prototype and are not current product screens. No sign-in, account, trading, or cloud deployment is part of this application.

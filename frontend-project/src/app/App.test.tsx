@@ -5,6 +5,7 @@ import App from '../App';
 import { MAIN_NAV_ITEMS } from '../components/Sidebar';
 import { fundamentalsFixture, overviewFixture } from '../features/stocks/StockResearch.fixtures';
 vi.mock('../features/stocks/PricePerformanceChart', () => ({ PricePerformanceChart: () => <div role="img" aria-label="Historical price performance chart" /> }));
+vi.mock('../features/stocks/PriceVolumeWorkspace', () => ({ PriceVolumeWorkspace: () => <div>Price & Volume workspace</div> }));
 
 const requests: string[] = [];
 

@@ -7,6 +7,7 @@ import { StockResearchPage } from './StockResearchPage';
 import { fundamentalsFixture, overviewFixture } from './StockResearch.fixtures';
 import type { StockOverview, Fundamentals } from '../../api/stocks';
 vi.mock('./PricePerformanceChart', () => ({ PricePerformanceChart: () => <div role="img" aria-label="Historical price performance chart" /> }));
+vi.mock('./PriceVolumeWorkspace', () => ({ PriceVolumeWorkspace: () => <div>Price & Volume workspace</div> }));
 let overview: StockOverview, fundamentals: Fundamentals, fail = '', calls: { path: string; method: string }[];
 const ok = (data: unknown) => ({ ok: true, status: 200, json: async () => ({ data }) });
 beforeEach(() => {

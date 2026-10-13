@@ -3,12 +3,13 @@ import { Alert, Button, Checkbox, Modal, Space, Tabs } from 'antd';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { StockHeader } from '../../components/StockHeader';
-import { EmptyState, ErrorState, LoadingState } from '../../components/States';
+import { ErrorState, LoadingState } from '../../components/States';
 import { ResearchHistoryDrawer } from '../../components/ResearchHistoryDrawer';
 import { ApiError } from '../../api/client';
 import { normalizeStockSymbol, overviewQuery, researchQuery, syncFundamentals, syncJobQuery, syncStock, type PriceRange, type ResearchRecord } from '../../api/stocks';
 import { requestError } from '../../api/watchlist';
-import { OverviewPanel, OverviewSections } from './OverviewSections';
+import { OverviewSections } from './OverviewSections';
+import { PriceVolumeWorkspace } from './PriceVolumeWorkspace';
 
 function StockWorkspace({ symbol }: { symbol: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -19,7 +20,7 @@ function StockWorkspace({ symbol }: { symbol: string }) {
   const client = useQueryClient();
   const overview = useQuery(overviewQuery(symbol, '1Y'));
   const activeTab = searchParams.get('tab') === 'price-volume' ? 'price-volume' : 'overview';
-  const historyOpen = searchParams.get('history') === 'open' && activeTab === 'overview';
+  const historyOpen = searchParams.get('history') === 'open';
   const history = useQuery(researchQuery(symbol, historyOpen && !!overview.data));
   const priceJob = useQuery(syncJobQuery(priceJobId)), secJob = useQuery(syncJobQuery(secJobId));
   useEffect(() => {
@@ -54,9 +55,9 @@ function StockWorkspace({ symbol }: { symbol: string }) {
     {jobs.map(({ name, query }) => query.data ? <Alert key={name} type={query.data.status === 'SUCCEEDED' ? 'success' : ['FAILED', 'INTERRUPTED'].includes(query.data.status) ? 'warning' : 'info'} title={`${name} sync: ${query.data.status}`} description={query.data.errorCode ?? undefined} /> : query.isError ? <Alert key={name} type="warning" title={`${name} job status unavailable`} /> : null)}
     <Tabs className="stock-tabs" activeKey={activeTab} onChange={key => updateParams(key === 'price-volume' ? 'price-volume' : 'overview')} items={[
       { key: 'overview', label: 'Overview', children: <OverviewSections data={data} range={range} onRange={setRange} onHistory={record => { setSelected(record ?? null); updateParams('overview', true); }} /> },
-      { key: 'price-volume', label: 'Price & Volume', children: <OverviewPanel title="Price & Volume"><EmptyState title="Price & Volume workspace" description="Historical price performance is available in Overview. The dedicated price and volume tools will be implemented in a later phase." /></OverviewPanel> },
+      { key: 'price-volume', label: 'Price & Volume', children: <PriceVolumeWorkspace data={data} active={activeTab === 'price-volume'} onResearch={record => { setSelected(record); updateParams('price-volume', true); }} /> },
     ]} />
-    <ResearchHistoryDrawer open={historyOpen} symbol={symbol} onClose={() => updateParams('overview')} records={history.data ?? data.history} selected={selected} onSelect={setSelected} />
+    <ResearchHistoryDrawer open={historyOpen} symbol={symbol} onClose={() => updateParams(activeTab)} records={history.data ?? data.history} selected={selected} onSelect={setSelected} />
     {historyOpen && history.isError && <Alert type="warning" title="Research history could not be refreshed" />}
     <Modal title="Sync Stock Data" open={syncOpen} onCancel={() => !sync.isPending && setSyncOpen(false)} footer={<Space><Button disabled={sync.isPending} onClick={() => setSyncOpen(false)}>Cancel</Button><Button type="primary" loading={sync.isPending} onClick={() => sync.mutate()}>Start Sync</Button></Space>}>
       <p>This explicitly requests Tiingo history for {stock.symbol}. Your stored data is preserved if the request fails.</p>

@@ -1,6 +1,6 @@
 # Stock Research Overview
 
-`/stocks/:symbol` is the cached single-stock research workspace. Exactly two tabs remain: Overview (default) and Price & Volume (`?tab=price-volume`). History stays embedded at the bottom and opens the right Drawer (`?history=open`). The full volume workspace and detailed report reader remain later phases.
+`/stocks/:symbol` is the cached single-stock research workspace. Exactly two tabs remain: Overview (default) and [Price & Volume](PRICE_VOLUME.md) (`?tab=price-volume`). History stays embedded at the bottom and opens the right Drawer (`?history=open`), which also accepts chart research markers while retaining Price & Volume. The detailed report reader remains a later phase.
 
 ## API and lifecycle
 

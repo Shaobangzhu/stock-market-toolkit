@@ -5,6 +5,9 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, extname } from 'node:path';
 import { overviewFixture, fundamentalsFixture } from '../src/features/stocks/StockResearch.fixtures.ts';
+import { dailyHistory, dailyBar, pricePage } from '../src/features/stocks/PriceVolume.fixtures.ts';
+const previewBars = dailyHistory().map((bar, i) => dailyBar(bar.tradingDate, Number((100 + i * 0.2 + 4 * Math.sin(i / 5)).toFixed(2))));
+const previewReports = [{ id: 'preview-report-1', completedAt: '2026-03-02T15:00:00Z', type: 'AI Report', version: 1, dataCutoff: '2026-02-27T20:00:00Z', fairValue: null }];
 const root = fileURLToPath(new URL('../dist/', import.meta.url));
 const server = createServer(async (request, response) => {
   const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
@@ -16,12 +19,20 @@ const server = createServer(async (request, response) => {
     if (!['TEST', 'PEER'].includes(symbol)) return json(404, { error: { code: 'NOT_FOUND' } });
     if (pathname.endsWith('/overview')) {
       const data = overviewFixture(symbol);
+      data.asOf = '2026-05-01T20:00:00Z'; data.history = previewReports;
+      data.stock.lastPrice = { value: previewBars.at(-1).close, tradingDate: previewBars.at(-1).tradingDate, retrievedAt: previewBars.at(-1).retrievedAt, provider: 'TIINGO', adjustmentMode: 'RAW' };
+      data.stock.dailyChange = null;
+      data.stock.entryZone = { lower: '105', upper: '110', currency: 'USD', scenarioId: 'preview-scenario', method: 'Isolated preview assumption', savedAt: '2026-03-01T15:00:00Z', dataCutoff: '2026-02-27T20:00:00Z', basis: 'TIINGO:DAY:RAW' };
       data.performance.range = new URL(request.url, 'http://127.0.0.1').searchParams.get('range') ?? '1Y';
       return json(200, { data });
     }
     if (pathname.endsWith('/fundamentals')) return json(200, { data: fundamentalsFixture(symbol) });
-    if (pathname.endsWith('/filings')) return json(200, { data: { symbol, filings: [] } });
-    if (pathname.endsWith('/research')) return json(200, { data: { records: [] } });
+    if (pathname.endsWith('/prices')) {
+      const adjusted = new URL(request.url, 'http://127.0.0.1').searchParams.get('adjustment') === 'total-return';
+      return json(200, { data: pricePage(previewBars.map(bar => adjusted ? { ...bar, adjustmentMode: 'TOTAL_RETURN', open: String(Number(bar.open) / 2), high: String(Number(bar.high) / 2), low: String(Number(bar.low) / 2), close: String(Number(bar.close) / 2), volume: '2000' } : bar), symbol) });
+    }
+    if (pathname.endsWith('/filings')) return json(200, { data: { symbol, filings: [{ id: 'preview-filing', form: '10-K', filedDate: '2026-03-16', reportPeriod: '2025-12-31', sourceUrl: 'https://www.sec.gov/edgar/search/' }] } });
+    if (pathname.endsWith('/research')) return json(200, { data: { records: previewReports } });
     return json(404, { error: { code: 'NOT_FOUND' } });
   }
   const path = pathname.startsWith('/assets/') ? resolve(root, `.${pathname}`) : resolve(root, 'index.html');

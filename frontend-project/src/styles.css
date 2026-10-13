@@ -169,6 +169,28 @@ a { color: inherit; }
 .price-panel .empty-state { min-height: 360px; }
 .price-volume-chart > div { width: 100%; height: 360px; }
 .chart-caption { font-variant-numeric: tabular-nums; }
+.price-volume-workspace { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: 18px; }
+.price-volume-main, .price-volume-side { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.technical-price-chart { width: 100%; height: 580px; }
+.chart-provenance { display: flex; flex-wrap: wrap; gap: 8px 15px; color: #91a9c4; font-size: 11px; margin: 20px 0 12px; }
+.chart-provenance strong { color: #cbdcf0; font-weight: 500; }
+.chart-date-navigation { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 16px 0; }
+.chart-date-navigation label { display: flex; flex-direction: column; gap: 5px; font-size: 11px; color: #9eb3cc; min-width: 0; }
+.chart-date-navigation input { color-scheme: dark; width: 138px; max-width: 100%; border: 1px solid #2a4460; border-radius: 6px; background: #0e1e32; color: #dbeafa; padding: 6px; }
+.chart-control-label { display: block; color: #9eb3cc; font-size: 11px; margin: 20px 0 8px; }
+.chart-indicator-controls { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+.technical-metric-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin-top: 20px; }
+.technical-metric { display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #263e58; padding-bottom: 12px; }
+.technical-metric span, .indicator-readings span { color: #94acc8; font-size: 11px; }
+.technical-metric strong { color: #e1efff; font-size: 18px; font-variant-numeric: tabular-nums; }
+.indicator-readings > div { display: flex; justify-content: space-between; font-size: 12px; margin: 8px 0; }
+.chart-event-list { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+.chart-event { display: flex; flex-direction: column; align-items: start; gap: 4px; padding: 8px; border: 1px solid #243f5a; border-radius: 8px; font-size: 11px; overflow-wrap: anywhere; }
+.chart-event small { color: #87a1bf; font-size: 10px; }
+.chart-event.selected { border-color: #168cff; background: #102d4b; }
+.chart-event .ant-btn { padding: 0; color: #88baff; font-size: 11px; }
+@media (max-width: 1200px) { .price-volume-workspace { grid-template-columns: minmax(0,1fr); } .price-volume-side { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; } }
+@media (max-width: 650px) { .price-volume-side { display: flex; } .technical-metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .technical-price-chart { height: 500px; } }
 .research-history-drawer .ant-drawer-title { display: flex; flex-direction: column; gap: 3px; }
 .research-history-drawer .ant-drawer-content { background: #102037; }
 .settings-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }

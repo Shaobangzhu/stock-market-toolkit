@@ -52,6 +52,8 @@ This plan authorizes no implementation by itself. The current phase creates thos
 
 ### 4. Add reliable Tiingo history, jobs, and Price & Volume
 
+**Price & Volume implemented:** [workspace contracts and formulas](PRICE_VOLUME.md) document cached OHLCV pagination, candles/lines, linked volume and oscillator panels, local indicators, range/date controls, actual filing/report markers and compatible saved entry zones. Verified earnings/major-event feeds and detailed report viewing remain future work.
+
 - Implement the local persisted job runner, transactional claim/deduplication, timeouts, quotas, redacted errors, and interruption handling before creating imports.
 - Implement Tiingo identity/history normalization and explicit date-range refresh. Store daily raw/adjusted OHLCV, currency/timezone, provenance, split/dividend fields where supplied, and retrieval/revision metadata.
 - Build aligned price/volume charts from one provider/basis; sort dates explicitly, preserve gaps, and label latest daily close and data freshness. Requery after job completion.
