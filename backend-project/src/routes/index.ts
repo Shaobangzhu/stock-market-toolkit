@@ -12,8 +12,10 @@ import { createStockOverviewRouter } from './stock-overview.js';
 import type { StockOverviewService } from '../services/stock-overview.js';
 import type { ValuationService } from '../services/valuation.js';
 import { createValuationRouter } from './valuation.js';
+import { createResearchHistoryRouter } from './research-history.js';
+import type { ResearchHistoryService } from '../services/research-history.js';
 
-export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDataService, sec?: SecService, watchlist?: WatchlistService, stockOverview?: StockOverviewService, valuation?: ValuationService) {
+export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDataService, sec?: SecService, watchlist?: WatchlistService, stockOverview?: StockOverviewService, valuation?: ValuationService, researchHistory?: ResearchHistoryService) {
   const router = Router();
   router.use('/health', createHealthRouter());
   router.use('/ready', createReadyRouter(database));
@@ -22,5 +24,6 @@ export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDa
   router.use(createWatchlistRouter(watchlist));
   router.use(createStockOverviewRouter(stockOverview));
   router.use(createValuationRouter(valuation));
+  router.use(createResearchHistoryRouter(researchHistory));
   return router;
 }

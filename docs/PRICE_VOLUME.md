@@ -50,7 +50,7 @@ Formula references: Fidelity's [EMA](https://www.fidelity.com/learning-center/tr
 
 Filings retain the SEC publication date (exact release time unavailable). Reports retain their completion timestamp, displayed in exchange timezone, and use R1/R2/R3 according to the stored report version. Non-trading dates attach visually to the next stored session, retaining the original date in Recent Events. Research timestamps at/after 16:00 exchange-local time attach no earlier than the next observation; 16:00 is an explicit US daily display convention, not an early-close or intraday availability model.
 
-Research clicks select the saved record in the existing right Drawer shell. Detailed report reading/version comparison remains a later feature. Events outside the chosen chart window have no plotted marker; Recent Events remains a bounded latest-events view. Official filing links are HTTPS SEC links.
+Research clicks select the corresponding saved report, scenario or note in the [Research History Drawer](RESEARCH_HISTORY.md), with original snapshots and same-series version comparison. Markers use chronological per-stock ordinals (`R1`, `R2`, etc.), distinct from series version numbers. Events outside the chosen chart window have no plotted marker; Recent Events remains a bounded latest-events view. Official filing links are HTTPS SEC links.
 
 Only a saved entry zone with matching currency and `TIINGO:DAY:RAW` basis receives a blue chart band. The band starts at the first observation after the saved-date/time anchor, never backcasting a future scenario. Adjusted charts do not convert raw targets. Missing scenarios show “No valuation scenario saved yet.” No valuation or entry formula was introduced.
 

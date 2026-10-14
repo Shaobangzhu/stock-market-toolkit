@@ -352,3 +352,13 @@ a { color: inherit; }
 .valuation-workspace pre, .valuation-modal pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 400px; overflow: auto; font-size: 12px; }
 .valuation-version { padding: 12px 0; border-bottom: 1px solid #203b57; overflow-wrap: anywhere; }
 @media (max-width: 800px) { .valuation-cases { grid-template-columns: 1fr; } }
+.history-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.history-filters > .ant-input-search, .history-all { grid-column: 1 / -1; }
+.history-all { display: flex; gap: 10px; align-items: center; }
+.history-record-list { display: grid; gap: 8px; margin: 16px 0; }
+.history-record-list .ant-btn { height: auto; white-space: normal; text-align: left; padding: 10px; }
+.history-details pre, .history-comparison pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; font: 12px/1.6 monospace; }
+.history-details dt { color: #9eb0c7; margin-top: 12px; }.history-details dd { margin: 4px 0; }
+.history-changed { border-left: 2px solid #1677ff; padding-left: 8px; }
+.history-selection > .ant-select { width: 100%; margin-bottom: 14px; }
+@media (max-width: 650px) { .history-filters { grid-template-columns: 1fr; } .research-history-drawer .ant-drawer-body { padding: 16px; } }

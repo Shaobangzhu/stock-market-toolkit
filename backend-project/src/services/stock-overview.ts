@@ -5,6 +5,7 @@ import { validateDailyCalendar } from '../providers/us-daily-calendar.js';
 import { readStockOverview } from '../repositories/stock-overview.js';
 import { projectWatchlistEntry } from './watchlist.js';
 import { marginOfSafety } from './valuation-engine.js';
+import { createResearchHistoryService } from './research-history.js';
 
 const Decimal = Prisma.Decimal.clone({ precision: 80 });
 export const overviewRange = z.enum(['1M', '3M', '6M', '1Y', '3Y', '5Y', 'MAX']);
@@ -57,7 +58,6 @@ export function pricePerformance(raw: PriceBar[], adjusted: PriceBar[], exchange
     averageVolume: selectedRaw.length ? selectedRaw.reduce((sum, row) => sum.plus(row.volume.toFixed()), new Decimal(0)).div(selectedRaw.length).toDecimalPlaces(8).toFixed() : null,
     volumeBasis: 'RAW shares; arithmetic mean over stored observations', calendarVerified };
 }
-const savedFair = z.object({ version: z.literal(1), adjustmentMode: z.literal('RAW'), fairValueLow: z.string().regex(/^(0|[1-9]\d*)(\.\d{1,8})?$/), fairValueHigh: z.string().regex(/^(0|[1-9]\d*)(\.\d{1,8})?$/) });
 const citedPoint = z.object({ text: z.string().trim().min(1).max(2000), sourceIds: z.array(z.uuid()).min(1).max(10) });
 const qualitativeProjection = z.object({ version: z.literal(1), bullishDrivers: z.array(citedPoint).max(10), bearishRisks: z.array(citedPoint).max(10), catalysts: z.array(citedPoint).max(10) });
 function publicSourceUrl(value: string) {
@@ -65,15 +65,7 @@ function publicSourceUrl(value: string) {
 }
 export function createStockOverviewService(db: PrismaClient, now = () => new Date()) {
   async function read(symbol: string, exchange?: string) { return readStockOverview(db, symbol, exchange, now()); }
-  function history(stored: Awaited<ReturnType<typeof read>>) {
-    return stored.instrument.researchRuns.map(run => {
-      const scenario = stored.reportScenarios.find(row => row.researchRunId === run.id);
-      const output = scenario?.resultSnapshot as Record<string, unknown> | null;
-      const fair = savedFair.safeParse(output?.watchlistProjection);
-      return { id: run.id, completedAt: run.completedAt!.toISOString(), type: 'AI Report', version: run.version, dataCutoff: run.dataCutoff.toISOString(),
-        fairValue: fair.success && new Decimal(fair.data.fairValueLow).gt(0) && new Decimal(fair.data.fairValueLow).lte(fair.data.fairValueHigh) ? { lower: fair.data.fairValueLow, upper: fair.data.fairValueHigh, currency: scenario!.currency } : null };
-    });
-  }
+  const history = createResearchHistoryService(db, now);
   return {
     async getOverview(symbol: string, range: OverviewRange, exchange?: string) {
       const at = now(), stored = await read(symbol, exchange);
@@ -96,9 +88,9 @@ export function createStockOverviewService(db: PrismaClient, now = () => new Dat
           cik: stored.issuer?.cik ?? null, secUrl: stored.issuer ? `https://www.sec.gov/edgar/browse/?CIK=${stored.issuer.cik}` : null },
         performance: pricePerformance(stored.instrument.priceBars, stored.adjusted, stored.instrument.exchange, range),
         marginOfSafety: currentSafety, marginOfSafetyReason: currentSafety === null ? 'Requires a saved Base Case and a comparable RAW share basis.' : 'Latest cached EOD close versus saved Base Case fair value; not planned-entry safety.',
-        history: history(stored).slice(0, 5), news, capabilities: { aiResearch: false, scenarioEditor: true } };
+        history: (await history.list({ symbol, exchange: stored.instrument.exchange, limit: 5, offset: 0 })).records, news, capabilities: { aiResearch: false, scenarioEditor: true } };
     },
-    async getHistory(symbol: string, limit: number, exchange?: string) { return { symbol, records: history(await read(symbol, exchange)).slice(0, limit), limit, boundedTo: 50 }; },
+    async getHistory(symbol: string, limit: number, exchange?: string) { return { symbol, ...(await history.list({ symbol, ...(exchange ? { exchange } : {}), limit, offset: 0 })), boundedTo: 50 }; },
   };
 }
 export type StockOverviewService = ReturnType<typeof createStockOverviewService>;

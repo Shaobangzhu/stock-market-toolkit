@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { once } from 'node:events';
+import { request as http } from 'node:http';
+import { test } from 'node:test';
+import { createApp } from '../dist/app.js';
+import { parseConfig } from '../dist/config/env.js';
+import { HttpError } from '../dist/utils/http-error.js';
+test('history filters/details are validated cache reads and note revisions require protected writes', async t => {
+  const calls=[],config=parseConfig({}),logs=[];let failure;
+  const service=Object.fromEntries(['list','detail','saveNote'].map(name=>[name,async(...args)=>{calls.push([name,...args]);if(failure)throw failure;return {records:[],nextOffset:null};}]));
+  const server=createApp(config,{researchHistory:service,logger:{info(){},error:r=>logs.push(r)}}).listen(0,'127.0.0.1');await once(server,'listening');t.after(()=>new Promise(resolve=>{server.close(resolve);server.closeAllConnections();}));
+  const send=(path,body,protectedWrite=true)=>new Promise((resolve,reject)=>{const data=body?JSON.stringify(body):undefined;const req=http({host:'127.0.0.1',port:server.address().port,path,method:body?'POST':'GET',headers:{Host:'127.0.0.1:7001',...(data?{'Content-Type':'application/json','Content-Length':Buffer.byteLength(data)}:{}),...(protectedWrite?{Origin:config.FRONTEND_ORIGIN,'X-Stock-Research-Lab':'1'}:{})}},res=>{let text='';res.on('data',d=>text+=d);res.on('end',()=>resolve({status:res.statusCode,body:JSON.parse(text)}));});req.on('error',reject);req.end(data);});
+  assert.equal((await send('/api/research/history?trackedOnly=true&search=keyword&kind=NOTE&from=2026-01-01&to=2026-02-01')).status,200);assert.equal(calls[0][1].trackedOnly,true);
+  assert.equal((await send('/api/research/history?symbol=TEST&exchange=NASDAQ')).status,200);
+  const id='00000000-0000-4000-8000-000000000001';assert.equal((await send(`/api/research/records/NOTE/${id}`)).status,200);assert.equal(calls.some(c=>c[0]==='saveNote'),false);
+  for(const q of ['','symbol=TEST&trackedOnly=true','trackedOnly=true&kind=BAD','trackedOnly=true&from=2026-02-30','trackedOnly=true&from=2026-03-01&to=2026-01-01','trackedOnly=true&limit=51','trackedOnly=true&offset=-1'])assert.equal((await send(`/api/research/history?${q}`)).status,400);
+  assert.equal((await send('/api/research/records/REPORT/invalid')).status,400);
+  const note={exchange:'NASDAQ',title:'Test fixture',content:'Test-only thesis'};assert.equal((await send('/api/stocks/TEST/notes',note,false)).status,403);assert.equal((await send('/api/stocks/TEST/notes',note)).status,201);
+  assert.equal((await send('/api/stocks/TEST/notes',{...note,expectedVersion:1})).status,400);
+  failure=new HttpError(409,'RESEARCH_CONFLICT','Reload before revising.');assert.equal((await send('/api/stocks/TEST/notes',note)).status,409);
+  failure=Error('synthetic-secret');assert.equal((await send('/api/research/history?trackedOnly=true')).status,503);assert.equal(JSON.stringify(logs).includes('synthetic-secret'),false);
+});

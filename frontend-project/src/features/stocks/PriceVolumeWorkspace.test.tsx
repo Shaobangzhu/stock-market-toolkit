@@ -28,6 +28,7 @@ beforeEach(() => {
     }
     if (url.pathname.endsWith('/filings')) return ok({ symbol: 'TEST', filings: [] });
     if (url.pathname.endsWith('/research')) return ok({ records: data.history });
+    if (url.pathname === '/api/research/history') return ok({ records: data.history, nextOffset:null });
     if (url.pathname.endsWith('/fundamentals')) return ok({ symbol: 'TEST', asOf: data.asOf, periods: [], valuation: { priceEarnings: { value: null, unit: 'ratio', derived: true, reason: 'MISSING', sources: [] }, priceSales: { value: null, unit: 'ratio', derived: true, reason: 'MISSING', sources: [] } }, freshness: { status: 'unavailable', lastSuccessAt: null, lastErrorCode: null }, limitations: [] });
     throw Error(`Unexpected request ${path}`);
   }));
@@ -79,9 +80,10 @@ it('entry zone overlays require matching raw basis/currency and never convert sa
   data.stock.entryZone = { lower: '90', upper: '95', currency: 'USD', scenarioId: 's1', method: 'User assumption', savedAt: '2026-03-01T15:00:00Z', dataCutoff: '2026-02-27T20:00:00Z', basis: 'TIINGO:DAY:RAW' };
   const user = userEvent.setup(); mount(); await screen.findByRole('img', { name: 'Test chart' }); expect(chart?.entryZone?.lower).toBe('90'); await user.click(screen.getByText('Adjusted')); expect(chart?.entryZone).toBeNull(); expect(screen.getByText(/Chart overlay unavailable/)).toBeInTheDocument();
 });
-it('events retain filing publication dates, exchange timezone and report version rather than inventing earnings', () => {
+it('events retain actual timestamps and unique saved ordinals across independent research series', () => {
   expect(exchangeDate('2026-03-03T02:00:00Z', 'America/New_York')).toBe('2026-03-02');
   expect(observationAnchor('2026-03-03T02:00:00Z', 'America/New_York')).toBe('2026-03-03');
-  const events = chartEvents([{ id: 'f1', form: '8-K', filedDate: '2026-03-02', reportPeriod: '2025-12-31', sourceUrl: 'https://www.sec.gov/test' }], [{ id: 'r1', completedAt: '2026-03-03T02:00:00Z', type: 'AI Report', version: 3, dataCutoff: '2026-03-01T00:00:00Z', fairValue: null }], 'America/New_York');
-  expect(events.map(event => event.date)).toEqual(['2026-03-02', '2026-03-02']); expect(events.find(e => e.kind === 'research')!.label).toBe('R3'); expect(events.some(event => event.kind === 'earnings')).toBe(false);
+  const events = chartEvents([{ id: 'f1', form: '8-K', filedDate: '2026-03-02', reportPeriod: '2025-12-31', sourceUrl: 'https://www.sec.gov/test' }], [{ id: 'r1', completedAt: '2026-03-03T02:00:00Z', type: 'AI Report', version: 3, markerOrdinal:7, dataCutoff: '2026-03-01T00:00:00Z', fairValue: null }], 'America/New_York');
+  expect(events.map(event => event.date)).toEqual(['2026-03-02', '2026-03-02']); expect(events.find(e => e.kind === 'research')!.label).toBe('R7'); expect(events.some(event => event.kind === 'earnings')).toBe(false);
+  expect(chartEvents([],[], 'America/New_York')).toEqual([]);
 });

@@ -20,6 +20,7 @@ beforeEach(() => {
     if (path.includes('/fundamentals?')) { if (fail === 'fundamentals') return { ok: false, status: 503, json: async () => ({ error: { code: 'DATABASE_UNAVAILABLE' } }) }; return ok(fundamentals); }
     if (path.includes('/filings?')) return ok({ symbol, filings: [] });
     if (path.includes('/research?')) return ok({ records: overview.history });
+    if (path.includes('/api/research/history?')) return ok({ records: overview.history, nextOffset: null });
     if (path.includes('/valuation/scenarios?')) return ok([]);
     if (path.endsWith('/sync')) return { ok: false, status: 429, json: async () => ({ error: { code: 'PROVIDER_RATE_LIMITED' } }) };
     throw Error(`Unexpected test request ${path}`);
@@ -30,7 +31,7 @@ describe('Stock Research Overview', () => {
   it('renders real API identity, EOD provenance, six sections, partial coverage and honest empty research without any writes', async () => {
     mount(); expect(await screen.findByRole('heading', { name: 'TEST' })).toBeInTheDocument();
     expect(screen.getByText('EOD close · 2026-01-06 · TIINGO · RAW')).toBeInTheDocument(); expect(screen.getByText('Market data is stale')).toBeInTheDocument();
-    for (const name of ['Price Performance', 'Company Overview', 'Valuation Snapshot', 'Entry Research', 'News & AI', 'Research History']) expect(screen.getByRole('heading', { name })).toBeInTheDocument();
+    for (const name of ['Price Performance', 'Company Overview', 'Valuation Snapshot', 'Entry Research', 'News & AI', 'TEST — Research History']) expect(screen.getByRole('heading', { name })).toBeInTheDocument();
     expect(await screen.findByRole('img', { name: 'Historical price performance chart' })).toBeInTheDocument();
     expect(screen.getByText(/Incomplete or unverified coverage/)).toBeInTheDocument(); expect(screen.getByText('No valuation scenario saved yet.')).toBeInTheDocument(); expect(screen.getByText('No research history yet')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Generate AI Research/ })).toBeDisabled(); expect(calls.every(call => call.method === 'GET')).toBe(true);

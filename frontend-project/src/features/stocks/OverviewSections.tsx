@@ -78,10 +78,11 @@ export function OverviewSections({ data, range, onRange, onHistory }: { data: St
       </div>
       <p className="chart-caption">Research runs only after an explicit action when the AI service is available.</p>
     </OverviewPanel>
-    <OverviewPanel title="Research History" action={<Button type="link" icon={<ArrowRightOutlined aria-label="View research" />} onClick={() => onHistory()}>View All</Button>}>
-      {data.history.length === 0 ? <EmptyState title="No research history yet" description="The five latest saved research records will appear here after you generate research." /> : <Table<ResearchRecord> rowKey="id" pagination={false} dataSource={data.history} scroll={{ x: 600 }} onRow={record => ({ onClick: () => onHistory(record) })} columns={[
+    <OverviewPanel title={`${stock.symbol} — Research History`} action={<Button type="link" icon={<ArrowRightOutlined aria-label="View research" />} onClick={() => onHistory()}>View All</Button>}>
+      {data.history.length === 0 ? <EmptyState title="No research history yet" description="Save an entry scenario or thesis note to start your history. AI reports appear here when available." /> : <Table<ResearchRecord> rowKey="id" pagination={false} dataSource={data.history.slice(0,5)} scroll={{ x: 800 }} onRow={record => ({ onClick: () => onHistory(record) })} columns={[
         { title: 'Research Date', key: 'date', render: (_, record) => <Button type="link" onClick={() => onHistory(record)}>{record.completedAt.slice(0, 10)}</Button> },
         { title: 'Type', dataIndex: 'type' }, { title: 'Fair Value', key: 'fair', render: (_, record) => rangeValue(record.fairValue) }, { title: 'Version', key: 'version', render: (_, record) => `v${record.version}` },
+        { title: 'Notes / Summary', key: 'summary', render: (_, record) => record.summary || 'No saved summary' },
       ]} />}
     </OverviewPanel>
   </div>;

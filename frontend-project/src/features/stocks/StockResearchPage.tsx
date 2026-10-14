@@ -57,7 +57,7 @@ function StockWorkspace({ symbol }: { symbol: string }) {
       { key: 'overview', label: 'Overview', children: <OverviewSections data={data} range={range} onRange={setRange} onHistory={record => { setSelected(record ?? null); updateParams('overview', true); }} /> },
       { key: 'price-volume', label: 'Price & Volume', children: <PriceVolumeWorkspace data={data} active={activeTab === 'price-volume'} onResearch={record => { setSelected(record); updateParams('price-volume', true); }} /> },
     ]} />
-    <ResearchHistoryDrawer open={historyOpen} symbol={symbol} onClose={() => updateParams(activeTab)} records={history.data ?? data.history} selected={selected} onSelect={setSelected} />
+    <ResearchHistoryDrawer open={historyOpen} symbol={symbol} exchange={stock.exchange} onClose={() => updateParams(activeTab)} records={history.data ?? data.history} selected={selected} onSelect={setSelected} />
     {historyOpen && history.isError && <Alert type="warning" title="Research history could not be refreshed" />}
     <Modal title="Sync Stock Data" open={syncOpen} onCancel={() => !sync.isPending && setSyncOpen(false)} footer={<Space><Button disabled={sync.isPending} onClick={() => setSyncOpen(false)}>Cancel</Button><Button type="primary" loading={sync.isPending} onClick={() => sync.mutate()}>Start Sync</Button></Space>}>
       <p>This explicitly requests Tiingo history for {stock.symbol}. Your stored data is preserved if the request fails.</p>

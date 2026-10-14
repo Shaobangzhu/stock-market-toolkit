@@ -11,6 +11,7 @@ import type { SecService } from './services/sec.js';
 import type { WatchlistService } from './services/watchlist.js';
 import type { StockOverviewService } from './services/stock-overview.js';
 import type { ValuationService } from './services/valuation.js';
+import type { ResearchHistoryService } from './services/research-history.js';
 
 export interface AppOptions {
   router?: Router;
@@ -21,6 +22,7 @@ export interface AppOptions {
   watchlist?: WatchlistService;
   stockOverview?: StockOverviewService;
   valuation?: ValuationService;
+  researchHistory?: ResearchHistoryService;
 }
 
 export function createApp(config: AppConfig, options: AppOptions = {}) {
@@ -33,7 +35,7 @@ export function createApp(config: AppConfig, options: AppOptions = {}) {
   app.use(localAccess(config));
   app.use(express.json({ limit: '32kb', strict: true, inflate: false }));
   app.use(express.urlencoded({ extended: false, limit: '32kb', parameterLimit: 100, inflate: false }));
-  app.use('/api', options.router ?? createApiRouter(options.database, options.marketData, options.sec, options.watchlist, options.stockOverview, options.valuation));
+  app.use('/api', options.router ?? createApiRouter(options.database, options.marketData, options.sec, options.watchlist, options.stockOverview, options.valuation, options.researchHistory));
   app.use(notFound);
   app.use(errorHandler(options.logger ?? logger));
   return app;

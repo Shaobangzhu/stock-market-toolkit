@@ -40,7 +40,7 @@ AI generation is disabled until its service exists. Existing successful `Researc
 - `ResearchRun.output.overviewProjection` may contain `{version: 1, bullishDrivers, bearishRisks, catalysts}`. Each bounded point is `{text, sourceIds}`; every UUID must belong to that report's stored citations. Unsourced/mismatched points are withheld. This does not authorize report generation or converting model text to numeric analysis.
 - URLs require HTTPS without embedded credentials. React renders commentary as text, never HTML. Missing sections stay empty.
 
-History includes only successful reports completed/cut off by the read time. Fair values come from each report's associated saved scenario. Record selection shows its date/version/cutoff in the Drawer shell; detailed report/citation/version comparison is deferred. View All returns at most fifty latest reports.
+History now includes completed AI reports, saved entry scenarios and manual thesis/notes. The latest five appear under `<SYMBOL> — Research History`, including saved summaries. The right Drawer reads original prices, assumptions, conclusions and citations, supports tracked-stock/type/date/keyword filtering and same-series previous/current comparisons, and appends immutable manual note revisions. See [Research History](RESEARCH_HISTORY.md) for snapshot rules, pagination and API contracts.
 
 ## Verification and isolated preview
 

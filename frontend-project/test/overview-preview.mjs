@@ -11,6 +11,16 @@ import { calculateSnapshot } from '../../backend-project/dist/services/valuation
 const valuationSnapshot = cutoff => ({ cutoff, instrument: { id: 'preview-only', symbol: 'TEST', exchange: 'NASDAQ', currency: 'USD' }, price: null, facts: [] });
 const previewBars = dailyHistory().map((bar, i) => dailyBar(bar.tradingDate, Number((100 + i * 0.2 + 4 * Math.sin(i / 5)).toFixed(2))));
 const previewReports = [{ id: 'preview-report-1', completedAt: '2026-03-02T15:00:00Z', type: 'AI Report', version: 1, dataCutoff: '2026-02-27T20:00:00Z', fairValue: null }];
+const historyFixtures = [
+  {id:'preview-note-2',kind:'NOTE',type:'Manual Thesis / Note',symbol:'TEST',exchange:'NASDAQ',seriesId:'preview-note-series',version:2,markerOrdinal:3,completedAt:'2026-03-20T15:00:00Z',dataCutoff:'2026-03-20T14:00:00Z',fairValue:null,summary:'Isolated fixture: revised personal thesis'},
+  {id:'preview-note-1',kind:'NOTE',type:'Manual Thesis / Note',symbol:'TEST',exchange:'NASDAQ',seriesId:'preview-note-series',version:1,markerOrdinal:2,completedAt:'2026-03-10T15:00:00Z',dataCutoff:'2026-03-10T14:00:00Z',fairValue:null,summary:'Isolated fixture: original personal thesis'},
+  {...previewReports[0],kind:'REPORT',symbol:'TEST',exchange:'NASDAQ',seriesId:'preview-report-series',markerOrdinal:1,summary:'Isolated fixture: saved cited report'},
+];
+function historyDetail(record) {
+  return {record,price:{value:record.version===2?'105':'100',currency:'USD',tradingDate:'2026-03-09',provider:'TIINGO',adjustmentMode:'RAW'},assumptions:null,entryZone:null,marginOfSafety:null,plannedMarginOfSafety:null,
+    analysis:record.version===2?'Isolated revised thesis: review updated evidence.':'Isolated original thesis: verify the business evidence.',thesis:record.version===2?'Isolated revised thesis':'Isolated original thesis',risks:[record.version===2?'Updated execution uncertainty':'Original execution uncertainty'],catalysts:['Verified filing review'],bullishDrivers:[],
+    sources:[{title:'Official SEC filings',url:'https://www.sec.gov/edgar/search/',citationKey:'SEC1',publishedAt:'2026-03-09'}],notes:[],versions:record.kind==='NOTE'?historyFixtures.filter(r=>r.kind==='NOTE').map(r=>({id:r.id,version:r.version,createdAt:r.completedAt})):[],snapshot:{inputs:{price:{close:'100',currency:'USD'}},outputs:{thesis:'Isolated original snapshot'},formulaVersion:null}};
+}
 const root = fileURLToPath(new URL('../dist/', import.meta.url));
 const server = createServer(async (request, response) => {
   const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
@@ -23,6 +33,14 @@ const server = createServer(async (request, response) => {
   }
   if (request.method !== 'GET') return json(503, { error: { code: 'PROVIDER_UNAVAILABLE' } });
   if (pathname.startsWith('/api/')) {
+    if (pathname === '/api/research/history') {
+      const q=new URL(request.url,'http://127.0.0.1').searchParams;
+      let records=q.get('trackedOnly')==='true'?[...historyFixtures,{...historyFixtures[0],id:'preview-peer-note',symbol:'PEER'}]:historyFixtures;
+      if(q.get('kind'))records=records.filter(r=>r.kind===q.get('kind'));
+      if(q.get('search'))records=records.filter(r=>(r.symbol+' '+r.summary).toLowerCase().includes(q.get('search').toLowerCase()));
+      return json(200,{data:{records,nextOffset:null}});
+    }
+    if(pathname.startsWith('/api/research/records/')){const record=historyFixtures.find(r=>r.id===pathname.split('/').at(-1));return record?json(200,{data:historyDetail(record)}):json(404,{error:{code:'NOT_FOUND'}});}
     const symbol = pathname.split('/')[3];
     if (pathname === '/api/ready') return json(200, { data: { status: 'ready', database: 'ok' } });
     if (!['TEST', 'PEER'].includes(symbol)) return json(404, { error: { code: 'NOT_FOUND' } });
@@ -30,7 +48,7 @@ const server = createServer(async (request, response) => {
     if (pathname.endsWith('/valuation/sources')) return json(200, { data: valuationSnapshot(new URL(request.url, 'http://127.0.0.1').searchParams.get('cutoff')) });
     if (pathname.endsWith('/overview')) {
       const data = overviewFixture(symbol);
-      data.asOf = '2026-05-01T20:00:00Z'; data.history = previewReports;
+      data.asOf = '2026-05-01T20:00:00Z'; data.history = historyFixtures;
       data.stock.lastPrice = { value: previewBars.at(-1).close, tradingDate: previewBars.at(-1).tradingDate, retrievedAt: previewBars.at(-1).retrievedAt, provider: 'TIINGO', adjustmentMode: 'RAW' };
       data.stock.dailyChange = null;
       data.stock.entryZone = { lower: '105', upper: '110', currency: 'USD', scenarioId: 'preview-scenario', method: 'Isolated preview assumption', savedAt: '2026-03-01T15:00:00Z', dataCutoff: '2026-02-27T20:00:00Z', basis: 'TIINGO:DAY:RAW' };
@@ -43,7 +61,7 @@ const server = createServer(async (request, response) => {
       return json(200, { data: pricePage(previewBars.map(bar => adjusted ? { ...bar, adjustmentMode: 'TOTAL_RETURN', open: String(Number(bar.open) / 2), high: String(Number(bar.high) / 2), low: String(Number(bar.low) / 2), close: String(Number(bar.close) / 2), volume: '2000' } : bar), symbol) });
     }
     if (pathname.endsWith('/filings')) return json(200, { data: { symbol, filings: [{ id: 'preview-filing', form: '10-K', filedDate: '2026-03-16', reportPeriod: '2025-12-31', sourceUrl: 'https://www.sec.gov/edgar/search/' }] } });
-    if (pathname.endsWith('/research')) return json(200, { data: { records: previewReports } });
+    if (pathname.endsWith('/research')) return json(200, { data: { records: historyFixtures } });
     return json(404, { error: { code: 'NOT_FOUND' } });
   }
   const path = pathname.startsWith('/assets/') ? resolve(root, `.${pathname}`) : resolve(root, 'index.html');

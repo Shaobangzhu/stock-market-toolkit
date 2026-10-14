@@ -21,7 +21,7 @@ export function observationAnchor(timestamp: string, timezone: string): string {
 export function chartEvents(filings: Filings['filings'], records: ResearchRecord[], timezone: string, verified: readonly ChartEventMarker[] = []): ChartEventMarker[] {
   const events: ChartEventMarker[] = [
     ...filings.filter(f => isTradingDate(f.filedDate.slice(0, 10))).map(f => ({ id: f.id, kind: 'filing' as const, date: f.filedDate.slice(0, 10), label: f.form, title: `${f.form} filing`, sourceUrl: f.sourceUrl, provenance: 'SEC publication date; exact release time unavailable' })),
-    ...records.map(r => ({ id: r.id, kind: 'research' as const, date: exchangeDate(r.completedAt, timezone), occurredAt: r.completedAt, label: `R${r.version}`, title: `${r.type} · version ${r.version}`, researchId: r.id, provenance: `Saved report completion · ${timezone}` })),
+    ...records.map(r => ({ id: r.id, kind: 'research' as const, date: exchangeDate(r.completedAt, timezone), occurredAt: r.completedAt, label: `R${r.markerOrdinal ?? r.version}`, title: `${r.type} · version ${r.version}`, researchId: r.id, provenance: `Saved research timestamp · ${timezone}` })),
     ...verified.filter(e => ['earnings', 'major-event'].includes(e.kind) && isTradingDate(e.date) && !!e.sourceUrl && !!e.provenance),
   ];
   return [...new Map(events.map(e => [e.id, e])).values()].sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));

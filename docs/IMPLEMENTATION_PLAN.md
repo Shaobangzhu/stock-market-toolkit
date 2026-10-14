@@ -97,6 +97,8 @@ This prompt milestone follows the Tiingo backend implementation. Prompt numberin
 
 ### 7. Add Responses API research and embedded history
 
+**Embedded history implemented:** [Research History](RESEARCH_HISTORY.md) provides the mixed five-record Overview preview, filtered Drawer, original snapshots/citations, same-series comparisons, immutable note revisions and chart-marker selection. Responses API report generation remains the separate unfinished part of this phase.
+
 - Resolve model, web-search/output capabilities, report structure, date horizon, and spend limits before coding. Treat the existing example model as a candidate only.
 - Implement bounded user-triggered research jobs over explicit input snapshots. Use OpenAI Responses API; retrieve news evidence with supported search; preserve returned citations and usage metadata; request `store: false`.
 - Validate generated output and refusal/incomplete cases. Save report, citations, and job success atomically. Do not blindly replay ambiguous paid requests after a crash or timeout.

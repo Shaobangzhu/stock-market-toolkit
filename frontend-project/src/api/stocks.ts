@@ -7,7 +7,7 @@ export function normalizeStockSymbol(value: string | undefined): string | null {
   const symbol = value?.trim().toUpperCase().replaceAll('.', '-') ?? '';
   return symbol.length <= 32 && /^[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*$/.test(symbol) ? symbol : null;
 }
-export interface ResearchRecord { id: string; completedAt: string; type: string; version: number; dataCutoff: string; fairValue: { lower: string; upper: string; currency: string } | null }
+export interface ResearchRecord { id: string; completedAt: string; type: string; version: number; dataCutoff: string; fairValue: { lower: string; upper: string; currency: string } | null; kind?: 'REPORT' | 'SCENARIO' | 'NOTE'; instrumentId?: string; symbol?: string; exchange?: string; company?: string; seriesId?: string; summary?: string; markerOrdinal?: number }
 export interface StockOverview {
   asOf: string; stock: WatchlistItem; inWatchlist: boolean; syncActive: boolean;
   company: { name: string; description: string | null; sector: string | null; industry: string | null; website: string | null; cik: string | null; secUrl: string | null };

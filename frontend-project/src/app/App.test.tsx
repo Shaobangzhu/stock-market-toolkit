@@ -19,6 +19,7 @@ beforeEach(() => {
     if (path.includes('/fundamentals?')) return { ok: true, status: 200, json: async () => ({ data: fundamentalsFixture(symbol) }) };
     if (path.includes('/filings?')) return { ok: true, status: 200, json: async () => ({ data: { symbol, filings: [] } }) };
     if (path.includes('/research?')) return { ok: true, status: 200, json: async () => ({ data: { records: [] } }) };
+    if (path.includes('/api/research/history?')) return { ok: true, status: 200, json: async () => ({ data: { records: [], nextOffset: null } }) };
     if (String(input) === '/api/ready') {
       return { ok: true, status: 200, json: async () => ({ data: { status: 'ready', database: 'ok' } }) };
     }
@@ -64,8 +65,8 @@ describe('navigation and initial data boundaries', () => {
     await user.click(screen.getByRole('tab', { name: 'Overview' }));
     expect(window.location.search).toBe('');
     expect(screen.getByRole('heading', { name: 'TEST' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Research History' })).toBeInTheDocument();
-    expect(requests.every(path => path.startsWith('/api/stocks/TEST/'))).toBe(true);
+    expect(screen.getByRole('heading', { name: 'TEST — Research History' })).toBeInTheDocument();
+    expect(requests.every(path => path.startsWith('/api/stocks/TEST/') || path.startsWith('/api/research/history?'))).toBe(true);
   });
 
   it('opens embedded research history from a direct URL and closes without losing stock context', async () => {
@@ -77,7 +78,7 @@ describe('navigation and initial data boundaries', () => {
     await waitFor(() => expect(window.location.pathname).toBe('/stocks/TEST'));
     expect(window.location.search).toBe('');
     expect(screen.getByRole('heading', { name: 'TEST' })).toBeInTheDocument();
-    expect(requests.every(path => path.startsWith('/api/stocks/TEST/'))).toBe(true);
+    expect(requests.every(path => path.startsWith('/api/stocks/TEST/') || path.startsWith('/api/research/history?'))).toBe(true);
   });
 
   it('normalizes unsupported tabs to Overview and rejects invalid symbols', async () => {
