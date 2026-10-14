@@ -34,7 +34,7 @@ try {
   const migrate = spawnSync(process.execPath, ['node_modules/prisma/build/index.js', 'migrate', 'deploy'], { cwd: root, env: environment, encoding: 'utf8', timeout: 60_000 });
   assert.equal(migrate.status, 0, 'Fresh test database migration failed; CLI output suppressed to protect credentials.');
   console.log('All migrations replayed successfully in a new isolated test database.');
-  const result = spawnSync(process.execPath, ['--test', '--test-concurrency=1', 'test/integration/database.test.mjs', 'test/integration/market-data.test.mjs', 'test/integration/sec.test.mjs', 'test/integration/watchlist.test.mjs', 'test/integration/stock-overview.test.mjs'], { cwd: root, env: environment, stdio: 'inherit', timeout: 90_000 });
+  const result = spawnSync(process.execPath, ['--test', '--test-concurrency=1', 'test/integration/database.test.mjs', 'test/integration/market-data.test.mjs', 'test/integration/sec.test.mjs', 'test/integration/watchlist.test.mjs', 'test/integration/stock-overview.test.mjs', 'test/integration/valuation.test.mjs'], { cwd: root, env: environment, stdio: 'inherit', timeout: 90_000 });
   assert.equal(result.status, 0, 'Integration tests failed.');
   if (process.argv.includes('--restart')) {
     database = createDatabase({ DATABASE_URL: testUrl.href });

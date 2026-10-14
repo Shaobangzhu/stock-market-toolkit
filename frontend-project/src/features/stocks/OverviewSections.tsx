@@ -1,4 +1,5 @@
 import { lazy, Suspense, type ReactNode } from 'react';
+import { ValuationWorkspace } from './ValuationWorkspace';
 import { Alert, Button, Radio, Table, Tooltip } from 'antd';
 import { ArrowRightOutlined, ExperimentOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
@@ -65,7 +66,7 @@ export function OverviewSections({ data, range, onRange, onHistory }: { data: St
           {!stock.entryZone && !stock.fairValue && <p>No valuation scenario saved yet.</p>}
           <MetricRow label="Saved fair-value interval" value={rangeValue(stock.fairValue)} /><MetricRow label="Target entry zone" value={rangeValue(stock.entryZone)} /><MetricRow label="Current margin of safety" value={percent(data.marginOfSafety)} detail={data.marginOfSafetyReason} /><MetricRow label="Distance to entry" value={percent(stock.distanceToEntry)} detail="Nearest saved boundary · comparable share basis required" />
           {stock.entryZone && <p className="chart-caption">Saved {stock.entryZone.savedAt.slice(0, 10)} · {stock.entryZone.method} · {stock.entryZone.basis}</p>}
-          <Tooltip title="Scenario editing requires an approved valuation methodology and will be implemented in a later phase."><span><Button disabled block>{stock.entryZone || stock.fairValue ? 'Edit Research Scenario' : 'Create Research Scenario'}</Button></span></Tooltip>
+          <ValuationWorkspace key={stock.instrumentId} symbol={stock.symbol} exchange={stock.exchange} currency={stock.currency} />
         </OverviewPanel>
       </div>
     </div>

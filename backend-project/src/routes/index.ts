@@ -10,8 +10,10 @@ import type { WatchlistService } from '../services/watchlist.js';
 import { createWatchlistRouter } from './watchlist.js';
 import { createStockOverviewRouter } from './stock-overview.js';
 import type { StockOverviewService } from '../services/stock-overview.js';
+import type { ValuationService } from '../services/valuation.js';
+import { createValuationRouter } from './valuation.js';
 
-export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDataService, sec?: SecService, watchlist?: WatchlistService, stockOverview?: StockOverviewService) {
+export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDataService, sec?: SecService, watchlist?: WatchlistService, stockOverview?: StockOverviewService, valuation?: ValuationService) {
   const router = Router();
   router.use('/health', createHealthRouter());
   router.use('/ready', createReadyRouter(database));
@@ -19,5 +21,6 @@ export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDa
   router.use(createSecRouter(sec));
   router.use(createWatchlistRouter(watchlist));
   router.use(createStockOverviewRouter(stockOverview));
+  router.use(createValuationRouter(valuation));
   return router;
 }

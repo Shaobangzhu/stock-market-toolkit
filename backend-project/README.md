@@ -21,6 +21,8 @@ Supported fields: `NODE_ENV`, `HOST`, `PORT`, `FRONTEND_ORIGIN`, `DATABASE_URL`,
 
 Stock Research adds cache-only Overview and completed-history endpoints. See [Stock Research Overview](../docs/STOCK_OVERVIEW.md) for request limits, price statistics, SEC valuation comparability and deferred capabilities. These endpoints reuse existing storage without schema migration or provider calls on reads.
 
+[Valuation & Entry Intelligence](../docs/VALUATION.md) adds cache-only source/history reads plus explicit Calculate and Save endpoints under `/api/stocks/:symbol/valuation`. Deterministic Decimal P/E, P/S and user fair-value scenarios retain immutable inputs, outputs and formula versions in the existing `EntryScenario` table; no migration or seeds are needed.
+
 `GET /api/health` returns HTTP 200:
 
 ```json

@@ -4,6 +4,7 @@ import { dateKey, dateValue } from '../providers/market-data.js';
 import { validateDailyCalendar } from '../providers/us-daily-calendar.js';
 import { readStockOverview } from '../repositories/stock-overview.js';
 import { projectWatchlistEntry } from './watchlist.js';
+import { marginOfSafety } from './valuation-engine.js';
 
 const Decimal = Prisma.Decimal.clone({ precision: 80 });
 export const overviewRange = z.enum(['1M', '3M', '6M', '1Y', '3Y', '5Y', 'MAX']);
@@ -77,6 +78,11 @@ export function createStockOverviewService(db: PrismaClient, now = () => new Dat
     async getOverview(symbol: string, range: OverviewRange, exchange?: string) {
       const at = now(), stored = await read(symbol, exchange);
       const projection = projectWatchlistEntry({ id: stored.membership?.id ?? stored.instrument.id, instrumentId: stored.instrument.id, addedAt: stored.membership?.addedAt ?? stored.instrument.createdAt, instrument: stored.instrument }, at);
+      const scenario = stored.instrument.entryScenarios.find(row => row.id === projection.entryZone?.scenarioId && row.methodVersion === 'valuation-v1');
+      const result = scenario?.resultSnapshot as { cases?: { name?: string; fairValue?: string }[] } | undefined;
+      const baseFair = result?.cases?.find(c => c.name === 'base')?.fairValue;
+      const currentSafety = baseFair && /^[0-9]+(\.[0-9]+)?$/.test(baseFair) && new Decimal(baseFair).gt(0) && projection.lastPrice && projection.distanceToEntry !== null
+        ? marginOfSafety(baseFair, projection.lastPrice.value) : null;
       const lastJob = stored.instrument.syncJobs[0];
       const sourceMap = new Map(stored.researchSources.map(source => [source.id, source]));
       const reportOutput = stored.instrument.researchRuns[0]?.output as Record<string, unknown> | null;
@@ -89,8 +95,8 @@ export function createStockOverviewService(db: PrismaClient, now = () => new Dat
         company: { name: stored.instrument.name, description: null, sector: null, industry: null, website: null,
           cik: stored.issuer?.cik ?? null, secUrl: stored.issuer ? `https://www.sec.gov/edgar/browse/?CIK=${stored.issuer.cik}` : null },
         performance: pricePerformance(stored.instrument.priceBars, stored.adjusted, stored.instrument.exchange, range),
-        marginOfSafety: null, marginOfSafetyReason: 'No approved saved margin-of-safety calculation is available.',
-        history: history(stored).slice(0, 5), news, capabilities: { aiResearch: false, scenarioEditor: false } };
+        marginOfSafety: currentSafety, marginOfSafetyReason: currentSafety === null ? 'Requires a saved Base Case and a comparable RAW share basis.' : 'Latest cached EOD close versus saved Base Case fair value; not planned-entry safety.',
+        history: history(stored).slice(0, 5), news, capabilities: { aiResearch: false, scenarioEditor: true } };
     },
     async getHistory(symbol: string, limit: number, exchange?: string) { return { symbol, records: history(await read(symbol, exchange)).slice(0, limit), limit, boundedTo: 50 }; },
   };

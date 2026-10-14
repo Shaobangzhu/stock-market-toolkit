@@ -342,3 +342,13 @@ a { color: inherit; }
 @media (max-width: 1170px) { .watchlist-workspace { grid-template-columns: 1fr; } .selected-stock-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 24px; } .selected-stock-heading { grid-column: 1; } .selected-stock-actions, .watchlist-job-status { grid-column: 1 / -1; } }
 @media (max-width: 950px) { .watchlist-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } .watchlist-page .page-heading { align-items: flex-start; flex-direction: column; } }
 @media (max-width: 600px) { .watchlist-metrics { gap: 10px; } .watchlist-metrics .metric-card { padding: 15px; } .watchlist-metrics .metric-card__top { font-size: 8px; } .watchlist-metrics .metric-card strong { font-size: 24px; } .watchlist-filters { grid-template-columns: 1fr; } .selected-stock-panel { display: block; } .empty-watchlist-guidance { flex-direction: column; align-items: center; gap: 12px; } .watchlist-page .page-heading .ant-space { width: 100%; flex-wrap: wrap; } }
+/* Scenario editing stays inside Overview; all values and provenance remain inspectable. */
+.valuation-workspace { display: grid; gap: 12px; }
+.valuation-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 20px 0; }
+.valuation-case { min-width: 0; padding: 16px; border: 1px solid #203b57; border-radius: 12px; background: #0b1a2b; }
+.valuation-case p { font-size: 12px; color: #9eb0c7; }
+.valuation-field { display: grid; gap: 6px; margin: 12px 0; font-size: 13px; }
+.valuation-field .ant-select { width: 100%; min-width: 0; }
+.valuation-workspace pre, .valuation-modal pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 400px; overflow: auto; font-size: 12px; }
+.valuation-version { padding: 12px 0; border-bottom: 1px solid #203b57; overflow-wrap: anywhere; }
+@media (max-width: 800px) { .valuation-cases { grid-template-columns: 1fr; } }

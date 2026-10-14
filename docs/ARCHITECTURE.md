@@ -8,6 +8,8 @@ Sections 1–3 describe observed implementation. Sections 4–9 are proposed imp
 
 ## 1. Actual current architecture
 
+**Valuation implementation:** [Valuation & Entry Intelligence](VALUATION.md) defines `valuation-v1`: deterministic Decimal annual P/E, equity P/S and direct user-estimate scenarios; Bear/Base/Bull comparison; publication/retrieval-bounded snapshots; immutable `EntryScenario` versions; cache-only source reads; explicit Calculate/Save APIs; and the Overview editor. This supersedes the audit's unresolved entry-method proposal for these methods only.
+
 ### Runtime, dependencies, and configuration
 
 There are two independent npm projects, with two lockfiles and no root orchestration/workspace configuration. No installed `node_modules` exists in either app root. There is no PostgreSQL client, Prisma schema/migration, Docker Compose file, Vite configuration, test file, or CI workflow in the tracked tree.

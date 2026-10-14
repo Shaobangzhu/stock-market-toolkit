@@ -20,6 +20,7 @@ beforeEach(() => {
     if (path.includes('/fundamentals?')) { if (fail === 'fundamentals') return { ok: false, status: 503, json: async () => ({ error: { code: 'DATABASE_UNAVAILABLE' } }) }; return ok(fundamentals); }
     if (path.includes('/filings?')) return ok({ symbol, filings: [] });
     if (path.includes('/research?')) return ok({ records: overview.history });
+    if (path.includes('/valuation/scenarios?')) return ok([]);
     if (path.endsWith('/sync')) return { ok: false, status: 429, json: async () => ({ error: { code: 'PROVIDER_RATE_LIMITED' } }) };
     throw Error(`Unexpected test request ${path}`);
   }));

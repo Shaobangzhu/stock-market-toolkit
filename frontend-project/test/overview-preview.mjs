@@ -1,22 +1,33 @@
 // Isolated visual-test server. Uses only test fixtures and built frontend assets.
-// It has no database/provider configuration and rejects all mutations.
+// It has no database/provider configuration. Calculation is pure; saves are rejected.
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve, extname } from 'node:path';
 import { overviewFixture, fundamentalsFixture } from '../src/features/stocks/StockResearch.fixtures.ts';
 import { dailyHistory, dailyBar, pricePage } from '../src/features/stocks/PriceVolume.fixtures.ts';
+import { valuationSchema } from '../../backend-project/dist/services/valuation-engine.js';
+import { calculateSnapshot } from '../../backend-project/dist/services/valuation.js';
+const valuationSnapshot = cutoff => ({ cutoff, instrument: { id: 'preview-only', symbol: 'TEST', exchange: 'NASDAQ', currency: 'USD' }, price: null, facts: [] });
 const previewBars = dailyHistory().map((bar, i) => dailyBar(bar.tradingDate, Number((100 + i * 0.2 + 4 * Math.sin(i / 5)).toFixed(2))));
 const previewReports = [{ id: 'preview-report-1', completedAt: '2026-03-02T15:00:00Z', type: 'AI Report', version: 1, dataCutoff: '2026-02-27T20:00:00Z', fairValue: null }];
 const root = fileURLToPath(new URL('../dist/', import.meta.url));
 const server = createServer(async (request, response) => {
   const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
   const json = (status, value) => { response.writeHead(status, { 'Content-Type': 'application/json' }); response.end(JSON.stringify(value)); };
+  if (request.method === 'POST' && pathname === '/api/stocks/TEST/valuation/calculate') {
+    let body = '';
+    for await (const chunk of request) { body += chunk; if (body.length > 32000) return json(413, { error: { code: 'PAYLOAD_TOO_LARGE' } }); }
+    try { const input = valuationSchema.parse(JSON.parse(body)); return json(200, { data: calculateSnapshot(input, valuationSnapshot(input.cutoff)) }); }
+    catch (error) { return json(error.status ?? 400, { error: { code: error.code ?? 'VALIDATION_ERROR', message: error.publicMessage ?? 'Check the valuation input bounds.' } }); }
+  }
   if (request.method !== 'GET') return json(503, { error: { code: 'PROVIDER_UNAVAILABLE' } });
   if (pathname.startsWith('/api/')) {
     const symbol = pathname.split('/')[3];
     if (pathname === '/api/ready') return json(200, { data: { status: 'ready', database: 'ok' } });
     if (!['TEST', 'PEER'].includes(symbol)) return json(404, { error: { code: 'NOT_FOUND' } });
+    if (pathname.endsWith('/valuation/scenarios')) return json(200, { data: [] });
+    if (pathname.endsWith('/valuation/sources')) return json(200, { data: valuationSnapshot(new URL(request.url, 'http://127.0.0.1').searchParams.get('cutoff')) });
     if (pathname.endsWith('/overview')) {
       const data = overviewFixture(symbol);
       data.asOf = '2026-05-01T20:00:00Z'; data.history = previewReports;

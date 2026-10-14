@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import { once } from 'node:events';
+import { request as httpRequest } from 'node:http';
+import { test } from 'node:test';
+import { createApp } from '../dist/app.js';
+import { parseConfig } from '../dist/config/env.js';
+import { HttpError } from '../dist/utils/http-error.js';
+test('valuation REST boundaries validate input, protect writes, preserve status codes and redact logs', async t => {
+  const calls = [], logs = [], config = parseConfig({}); let failure;
+  const service = Object.fromEntries(['sources', 'list', 'calculate', 'save'].map(name => [name, async (...args) => { calls.push([name, ...args]); if (failure) throw failure; return {}; }]));
+  const server = createApp(config, { valuation: service, logger: { error: r => logs.push(r), info() {} } }).listen(0, '127.0.0.1');
+  await once(server, 'listening'); t.after(() => new Promise(resolve => { server.close(resolve); server.closeAllConnections(); }));
+  const request = (action, method = 'GET', data, protectedWrite = true) => new Promise((resolve, reject) => {
+    const body = data ? JSON.stringify(data) : undefined;
+    const req = httpRequest({ host: '127.0.0.1', port: server.address().port, path: `/api/stocks/TEST/valuation/${action}`, method, headers: { Host: '127.0.0.1:7001', ...(body ? { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } : {}), ...(protectedWrite ? { Origin: config.FRONTEND_ORIGIN, 'X-Stock-Research-Lab': '1' } : {}) } }, res => { let text = ''; res.on('data', c => text += c); res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(text) })); }); req.on('error', reject); req.end(body);
+  });
+  const c = { method: 'DIRECT', fairValue: '100', rationale: 'Test-only assumption', entry: { mode: 'MARGIN', minimumSafety: '20', maximumSafety: '40' }, hypotheticalPrice: null };
+  const assumptions = { exchange: 'NASDAQ', cutoff: '2026-04-01T00:00:00Z', cases: { bear: c, base: c, bull: c } };
+  assert.equal((await request('scenarios?exchange=NASDAQ')).status, 200);
+  assert.equal((await request('sources?exchange=NASDAQ&cutoff=2026-04-01T00%3A00%3A00Z')).status, 200);
+  assert.deepEqual(calls.map(c => c[0]), ['list', 'sources']);
+  assert.equal((await request('calculate', 'POST', assumptions, false)).status, 403);
+  assert.equal((await request('calculate', 'POST', assumptions)).status, 200);
+  assert.equal(calls.at(-1)[2].cutoff, '2026-04-01T00:00:00.000Z');
+  assert.equal((await request('save', 'POST', { assumptions, expectedHash: 'a'.repeat(64) })).status, 201);
+  for (const action of ['calculate', 'save']) assert.equal((await request(action)).status, 405);
+  assert.equal((await request('calculate', 'POST', { ...assumptions, secret: 'synthetic-secret' })).status, 400);
+  assert.equal((await request('sources?exchange=NASDAQ&cutoff=invalid')).status, 400);
+  assert.equal((await request('save', 'POST', { assumptions, expectedHash: 'a'.repeat(64), expectedVersion: 1 })).status, 400);
+  failure = new HttpError(422, 'VALUATION_UNAVAILABLE', 'P/E requires positive annual diluted EPS.');
+  assert.equal((await request('calculate', 'POST', assumptions)).status, 422);
+  failure = new HttpError(409, 'VALUATION_CONFLICT', 'Calculate again.'); assert.equal((await request('save', 'POST', { assumptions, expectedHash: 'a'.repeat(64) })).status, 409);
+  failure = Error('synthetic-secret'); const failed = await request('calculate', 'POST', assumptions); assert.equal(failed.status, 503);
+  assert.equal(JSON.stringify([logs, failed]).includes('synthetic-secret'), false);
+});

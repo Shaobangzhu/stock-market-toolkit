@@ -41,7 +41,7 @@ Use ordinary browser paths, not hash routing. A direct load or refresh of a stoc
 - Support user-requested refreshes with progress and failure states. Keep prior successful data readable on failure.
 - Preserve raw and adjusted data and their provenance. Never compare values from different currencies or adjustment bases without an explicit conversion/method.
 - Entry-price scenarios identify their method, assumptions, input dates, data completeness, and calculation version. User-entered targets must be labeled as user assumptions. An unavailable calculation returns “insufficient data,” not a fabricated estimate.
-- The actual entry-price methodology, horizons, indicators, valuation inputs, and presentation require a product decision before implementation. Do not infer a trading strategy from the old covered-call example or “chip distribution” image.
+- Approved valuation methods, user-controlled horizons/inputs, safety definitions and presentation are now implemented in [Valuation & Entry Intelligence](VALUATION.md). These are transparent hypothetical scenarios, not trading strategies inferred from legacy examples.
 
 ### Filings, fundamentals, and qualitative research
 

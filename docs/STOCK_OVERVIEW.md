@@ -28,7 +28,7 @@ Overview reads a repeatable-read PostgreSQL snapshot, bounded to 20,000 observat
 - Average volume: arithmetic mean of stored **RAW shares** in the selected window, without estimates for omitted days.
 - P/E and P/S use backend annual-denominator methods, labeled **not TTM**, with source/report/quote dates. The browser does not recompute them. Negative earnings/incomparable periods stay N/A.
 - `valuation.marketCapitalization` adds a Decimal-string metric: RAW close × positive same-date shares for one verified listed class and matching currency. Market cap and P/S reject shares disclosed after the quote date. This strict rule often yields N/A.
-- Saved fair value, entry zone and geometric entry distance reuse scenario provenance. Margin of safety remains N/A until an approved saved calculation contract/method exists. Scenario buttons explain the deferred editor; no entry-price formula was invented.
+- Saved fair value and entry zone reuse scenario provenance. [Valuation & Entry Intelligence](VALUATION.md) now provides the scenario editor, comparison and calculation details. Current margin of safety uses the saved Base Case fair value and latest comparable raw close; planned-entry safety is separately labeled in the comparison. Boundary-relative entry distance keeps its documented sign convention.
 
 ## Company, news and history
 

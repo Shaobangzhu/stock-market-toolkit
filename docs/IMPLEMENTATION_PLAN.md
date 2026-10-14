@@ -87,7 +87,9 @@ This prompt milestone follows the Tiingo backend implementation. Prompt numberin
 
 ### 6. Implement approved entry-price analysis
 
-- First resolve decision U03 below. Write the method specification and hand-checkable expected cases before implementation.
+**Implemented:** [Valuation & Entry Intelligence](VALUATION.md) provides deterministic annual EPS/P/E and revenue/P/S models, direct user fair-value assumptions, Bear/Base/Bull comparisons, separate current/planned safety, versioned source snapshots and an Overview editor. The user's valuation-engine request resolves U03 for these explicitly documented methods. Full DCF, automated recommendations and backtesting are outside this implementation.
+
+- The implemented U03 methods and hand-checkable expected cases are specified in VALUATION.md. Additional methodologies require their own explicit specification and tests.
 - Implement pure deterministic calculations over normalized persisted data, with explicit lookback, basis, units, assumptions, rounding, and minimum-data rules.
 - Persist immutable `EntryAnalysis` inputs, method version, cutoff, and results. Distinguish user targets from computed results. Do not infer numeric targets from an LLM narrative or the legacy covered-call script.
 
@@ -120,7 +122,7 @@ These are bounded uncertainties, not permission to expand the product beyond the
 | --- | --- | --- |
 | U01 | Supported markets, instrument types, currency scope, duplicate symbols, renamed/delisted stocks. | US-listed equities, daily bars, listing currency; canonical symbol unique in this initial universe. Confirm before symbol/schema/provider work; multi-market support requires revisiting the route identity. |
 | U02 | Tiingo account coverage, request quotas, permitted storage, adjustment semantics, and desired date range. | Tiingo is the sole MVP price provider, with no automatic fallback. Existing verified defaults and application coverage limits are recorded in TIINGO.md; live account entitlements remain unverified. |
-| U03 | Meaning of “entry-price intelligence”: valuation vs price-based method, formula, lookback, scenarios, user inputs, rounding, missing-data rules, and expected examples. | Do not invent a method. Blocks calculated entry prices in phase 6, not the empty shell/watchlist/history foundation. No backtesting or automated strategy execution implied. |
+| U03 | Resolved for valuation-v1 by the user’s deterministic valuation-engine request. | See VALUATION.md for annual P/E, equity P/S, direct user fair value, Bear/Base/Bull cases, entry safety, exact rounding and missing-data rules. Full DCF, backtesting and automated strategy execution remain outside scope. |
 | U04 | SEC forms, metric definitions, quarterly/annual/TTM selection, restatement/cutoff policy, and foreign-issuer support. | Start with selected US-company annual/quarterly filings, preserve original contexts. Confirm exact forms/concepts and cutoff behavior before phase 5 calculations. |
 | U05 | OpenAI model and account tool access, research horizon/template, maximum cost/token/tool budget, and whether user notes may be sent. | Responses API, cited news plus qualitative analysis, public selected evidence only, `store: false`; no automatic paid runs. Blocks phase 7 provider wiring. Existing `gpt-5-mini` example is not a verified selection. |
 | U06 | Exact Node/npm/TS/Vite/Ant Design/ECharts/Express/Prisma/PostgreSQL versions and module settings. | Candidate Node 24, React 19, Ant Design 6, Express 5; confirm all peers, Prisma config/adapter, database image, and clean build in phases 1–2. |

@@ -7,6 +7,7 @@ export class ApiError extends Error {
     public readonly status: number,
     public readonly code: string,
     public readonly requestId?: string,
+    public readonly publicMessage?: string,
   ) {
     super('The local data service could not complete this request.');
     this.name = 'ApiError';
@@ -35,7 +36,7 @@ export async function requestApiJson<T>(method: 'GET' | 'POST' | 'PATCH' | 'DELE
   if (!response.ok) {
     const error = payload && typeof payload === 'object' && 'error' in payload
       ? (payload as ApiErrorBody).error : undefined;
-    throw new ApiError(response.status, error?.code ?? 'REQUEST_FAILED', error?.requestId);
+    throw new ApiError(response.status, error?.code ?? 'REQUEST_FAILED', error?.requestId, error?.message);
   }
   return decode(payload);
 }
