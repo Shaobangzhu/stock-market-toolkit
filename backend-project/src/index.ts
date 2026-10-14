@@ -12,6 +12,7 @@ import { createWatchlistService } from './services/watchlist.js';
 import { createStockOverviewService } from './services/stock-overview.js';
 import { createValuationService } from './services/valuation.js';
 import { createResearchHistoryService } from './services/research-history.js';
+import { createSettingsService } from './services/settings.js';
 
 // No other module reads process.env. Load dotenv and validate before creating services.
 try {
@@ -36,7 +37,7 @@ try {
       process.exitCode = 1;
     }
   };
-  const app = createApp(config, { ...(database ? { database, valuation: createValuationService(database.client), researchHistory: createResearchHistoryService(database.client) } : {}), ...(marketData ? { marketData } : {}), ...(sec ? { sec } : {}), ...(watchlist ? { watchlist } : {}), ...(stockOverview ? { stockOverview } : {}) });
+  const app = createApp(config, { settings: createSettingsService(config, database?.client, marketData, sec), ...(database ? { database, valuation: createValuationService(database.client), researchHistory: createResearchHistoryService(database.client) } : {}), ...(marketData ? { marketData } : {}), ...(sec ? { sec } : {}), ...(watchlist ? { watchlist } : {}), ...(stockOverview ? { stockOverview } : {}) });
   const server = app.listen(config.PORT, config.HOST, () => {
     logger.info({ event: 'server_started', host: config.HOST, port: config.PORT });
   });

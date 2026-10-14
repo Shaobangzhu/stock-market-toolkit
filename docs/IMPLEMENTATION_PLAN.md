@@ -109,6 +109,8 @@ This prompt milestone follows the Tiingo backend implementation. Prompt numberin
 
 ### 8. Finish Data & Settings and local reliability
 
+**Workspace implemented:** [Data & Settings](DATA_SETTINGS.md) provides actual PostgreSQL/provider evidence, cache coverage, job diagnostics, protected sync/retry actions, validated atomic manual-note CSV imports, snapshot research exports and persisted nonsecret research preferences. OpenAI execution/connection tests and spend enforcement remain future work. Complete local operational/advisory-audit acceptance work below is not claimed by this workspace phase.
+
 - Complete effective preferences, masked configuration status, explicit connection tests, data coverage/freshness, and job diagnostics. Secrets stay in the backend environment file.
 - Document local startup/shutdown, ports, upgrades, database backups/restoration, and provider quota behavior. Validate restore into a separate disposable database; do not overwrite personal data.
 - Verify restart recovery, read-only offline access, graceful shutdown, safe logs, local Host/Origin defenses, and exclusion of secrets from bundles. Review the resolved dependency graph with a current advisory audit; prioritize reachable production risks as well as development-server exposure.

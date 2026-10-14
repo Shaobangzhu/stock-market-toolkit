@@ -29,7 +29,7 @@ Stock Research adds cache-only Overview and completed-history endpoints. See [St
 {"data":{"status":"ok","application":"Stock Research Lab"}}
 ```
 
-This is liveness only: it does not check PostgreSQL/provider availability, expose configuration, or write data. It accepts no query parameters or body. HEAD is supported; other non-OPTIONS methods return 405 after the local write checks. Unknown endpoints return 404. Authentication and legacy JSON-data endpoints are removed. Implemented endpoints use `/api`; see [Tiingo](../docs/TIINGO.md), [SEC EDGAR](../docs/SEC_EDGAR.md), [Watchlist](../docs/WATCHLIST.md) and [Stock Research Overview](../docs/STOCK_OVERVIEW.md). Settings business APIs remain a later phase.
+This is liveness only: it does not check PostgreSQL/provider availability, expose configuration, or write data. It accepts no query parameters or body. HEAD is supported; other non-OPTIONS methods return 405 after the local write checks. Unknown endpoints return 404. Authentication and legacy JSON-data endpoints are removed. Implemented endpoints use `/api`; see [Tiingo](../docs/TIINGO.md), [SEC EDGAR](../docs/SEC_EDGAR.md), [Watchlist](../docs/WATCHLIST.md), [Stock Research Overview](../docs/STOCK_OVERVIEW.md) and [Data & Settings](../docs/DATA_SETTINGS.md). Settings exposes local status, coverage/jobs, validated nonsecret preferences, explicit sync/retry, atomic manual-note CSV imports and research exports.
 
 All future POST/PUT/PATCH/DELETE requests must include:
 
@@ -45,7 +45,7 @@ JSON and URL-encoded parsers are Express built-ins with a 32 KiB limit and no co
 
 Errors use `{error:{code,message,requestId}}`, with 400 validation/malformed input, 403 local-access rejection, 404 unknown endpoint, 405 wrong method, 413 oversized body, 415 unsupported encoding/content type, 500 unexpected failure, or 503 database unavailability. Public messages are safe constants. Logs contain operational metadata, never raw error/config/request objects, request URLs/bodies, stack traces, or API key values. Startup uses validated config, handles listen failures safely, and closes on SIGINT/SIGTERM with a bounded deadline.
 
-The database foundation, Tiingo daily history and SEC EDGAR filings/fundamentals are implemented, with cache-only reads and explicit sync jobs. See [Tiingo API and limits](../docs/TIINGO.md) and [SEC API, financial definitions and point-in-time limitations](../docs/SEC_EDGAR.md). SEC requires a real contact User-Agent, no API key. No seeds or legacy data migration exist. HTTP tests use ephemeral listeners; database fixtures run only in isolated test databases. The React 19/Vite frontend shell currently calls only the readiness API from Data & Settings; chart/watchlist/fundamentals API wiring remains future work.
+The database foundation, Tiingo daily history and SEC EDGAR filings/fundamentals are implemented, with cache-only reads and explicit sync jobs. See [Tiingo API and limits](../docs/TIINGO.md) and [SEC API, financial definitions and point-in-time limitations](../docs/SEC_EDGAR.md). SEC requires a real contact User-Agent, no API key. No seeds or legacy data migration exist. HTTP tests use ephemeral listeners; database fixtures run only in isolated test databases. The frontend connects Watchlist, Overview, Price & Volume, Embedded Research History and Data & Settings to the local APIs. OpenAI report generation and budget enforcement remain future work.
 
 ## PostgreSQL foundation
 

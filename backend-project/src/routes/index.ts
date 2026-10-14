@@ -14,8 +14,10 @@ import type { ValuationService } from '../services/valuation.js';
 import { createValuationRouter } from './valuation.js';
 import { createResearchHistoryRouter } from './research-history.js';
 import type { ResearchHistoryService } from '../services/research-history.js';
+import type { SettingsService } from '../services/settings.js';
+import { createSettingsRouter } from './settings.js';
 
-export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDataService, sec?: SecService, watchlist?: WatchlistService, stockOverview?: StockOverviewService, valuation?: ValuationService, researchHistory?: ResearchHistoryService) {
+export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDataService, sec?: SecService, watchlist?: WatchlistService, stockOverview?: StockOverviewService, valuation?: ValuationService, researchHistory?: ResearchHistoryService, settings?: SettingsService) {
   const router = Router();
   router.use('/health', createHealthRouter());
   router.use('/ready', createReadyRouter(database));
@@ -25,5 +27,6 @@ export function createApiRouter(database?: DatabaseHealth, marketData?: MarketDa
   router.use(createStockOverviewRouter(stockOverview));
   router.use(createValuationRouter(valuation));
   router.use(createResearchHistoryRouter(researchHistory));
+  router.use(createSettingsRouter(settings));
   return router;
 }

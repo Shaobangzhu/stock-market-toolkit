@@ -194,6 +194,13 @@ a { color: inherit; }
 .research-history-drawer .ant-drawer-title { display: flex; flex-direction: column; gap: 3px; }
 .research-history-drawer .ant-drawer-content { background: #102037; }
 .settings-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+.settings-page { display: flex; flex-direction: column; gap: 20px; }
+.settings-page .metrics-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; }
+.settings-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.settings-actions .ant-btn { height: auto; min-height: 40px; white-space: normal; }
+.settings-page .settings-list strong { overflow-wrap: anywhere; text-align: right; }
+@media (max-width: 900px) { .settings-page .metrics-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 520px) { .settings-actions, .settings-page .metrics-grid { grid-template-columns: 1fr; } }
 .settings-grid .panel { min-height: 210px; }
 .settings-grid .panel__header { margin-bottom: 24px; }
 .settings-grid p { max-width: 520px; }

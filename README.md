@@ -40,6 +40,7 @@ The MVP has exactly three external providers: **Tiingo** for daily market prices
 - [Stock Research Overview, financial display policies, and validation](docs/STOCK_OVERVIEW.md)
 - [Valuation formulas, scenario API, precision and historical limits](docs/VALUATION.md)
 - [Embedded Research History, saved snapshots, notes and version comparison](docs/RESEARCH_HISTORY.md)
+- [Data & Settings, status evidence, CSV import, exports and preferences](docs/DATA_SETTINGS.md)
 - [Price & Volume controls, indicator formulas, event provenance, and validation](docs/PRICE_VOLUME.md)
 
 The `assets/` screenshots document the former prototype and are not current product screens. No sign-in, account, trading, or cloud deployment is part of this application.

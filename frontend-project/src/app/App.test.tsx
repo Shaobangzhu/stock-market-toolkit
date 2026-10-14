@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import App from '../App';
 import { MAIN_NAV_ITEMS } from '../components/Sidebar';
 import { fundamentalsFixture, overviewFixture } from '../features/stocks/StockResearch.fixtures';
+import { preferenceFixture, settingsFixture } from '../features/settings/Settings.fixtures';
 vi.mock('../features/stocks/PricePerformanceChart', () => ({ PricePerformanceChart: () => <div role="img" aria-label="Historical price performance chart" /> }));
 vi.mock('../features/stocks/PriceVolumeWorkspace', () => ({ PriceVolumeWorkspace: () => <div>Price & Volume workspace</div> }));
 
@@ -15,6 +16,10 @@ beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
     requests.push(String(input));
     const path = String(input), symbol = path.split('/')[3] ?? 'TEST';
+    if (path === '/api/settings/status') return { ok: true, status: 200, json: async () => ({ data: settingsFixture }) };
+    if (path === '/api/settings/preferences') return { ok: true, status: 200, json: async () => ({ data: preferenceFixture }) };
+    if (path.startsWith('/api/settings/jobs')) return { ok: true, status: 200, json: async () => ({ data: { jobs: [], nextOffset: null } }) };
+    if (path.startsWith('/api/settings/coverage')) return { ok: true, status: 200, json: async () => ({ data: { instruments: [], nextOffset: null } }) };
     if (path.includes('/overview?')) return { ok: true, status: 200, json: async () => ({ data: overviewFixture(symbol) }) };
     if (path.includes('/fundamentals?')) return { ok: true, status: 200, json: async () => ({ data: fundamentalsFixture(symbol) }) };
     if (path.includes('/filings?')) return { ok: true, status: 200, json: async () => ({ data: { symbol, filings: [] } }) };
@@ -91,11 +96,11 @@ describe('navigation and initial data boundaries', () => {
     expect(await screen.findByText('Invalid stock symbol')).toBeInTheDocument();
   });
 
-  it('checks only local database readiness on settings', async () => {
+  it('reads local settings without creating jobs or provider requests', async () => {
     window.history.replaceState({}, '', '/settings');
     render(<App />);
     expect(await screen.findByRole('heading', { name: 'Data & Settings' })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText('Ready for local data')).toBeInTheDocument());
-    expect(requests).toEqual(['/api/ready']);
+    await screen.findByText('isolated_test_database');
+    expect(requests.sort()).toEqual(['/api/settings/status', '/api/settings/preferences', '/api/settings/jobs?offset=0', '/api/settings/coverage?offset=0'].sort());
   });
 });

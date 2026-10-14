@@ -11,6 +11,11 @@ export interface SecAdmission {
   complete(id: string, bytes: number, errorCode?: string, retryAfter?: Date): Promise<void>;
 }
 interface Options { fetch?: typeof fetch; now?: () => Date; sleep?: (ms: number) => Promise<unknown>; admission?: SecAdmission; requestTimeoutMs?: number }
+export function isSecConfigured(userAgent: string | undefined): boolean {
+  const contact = userAgent?.match(/[^\s<>]+@([^\s<>]+)/)?.[1]?.toLowerCase();
+  return !!contact && !/^(?:example\.(?:com|org|net)|localhost)$/.test(contact) && !/\.(?:invalid|test|example)$/.test(contact)
+    && !/(?:your-real-contact|your-email|changeme|placeholder)/i.test(userAgent!);
+}
 export class SecEdgarProvider {
   readonly name = 'SEC_EDGAR';
   readonly configured: boolean;
@@ -27,9 +32,7 @@ export class SecEdgarProvider {
   private requestTimeoutMs: number;
   constructor(private config: Pick<AppConfig, 'SEC_EDGAR_USER_AGENT' | 'SEC_EDGAR_MAX_RPS'>, options: Options = {}) {
     // A syntax-valid example contact is not a valid operational contact.
-    const contact = config.SEC_EDGAR_USER_AGENT?.match(/[^\s<>]+@([^\s<>]+)/)?.[1]?.toLowerCase();
-    this.configured = !!contact && !/^(?:example\.(?:com|org|net)|localhost)$/.test(contact) && !/\.(?:invalid|test|example)$/.test(contact)
-      && !/(?:your-real-contact|your-email|changeme|placeholder)/i.test(config.SEC_EDGAR_USER_AGENT!);
+    this.configured = isSecConfigured(config.SEC_EDGAR_USER_AGENT);
     this.fetcher = options.fetch ?? fetch; this.now = options.now ?? (() => new Date()); this.sleep = options.sleep ?? delay;
     this.admission = options.admission;
     this.requestTimeoutMs = Math.min(15_000, Math.max(1, options.requestTimeoutMs ?? 15_000));

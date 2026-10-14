@@ -8,6 +8,8 @@ Sections 1–3 describe observed implementation. Sections 4–9 are proposed imp
 
 ## 1. Actual current architecture
 
+**Data & Settings implementation:** [workspace contracts](DATA_SETTINGS.md) document evidence-based status for the three approved providers, PostgreSQL diagnostics, paged jobs/coverage, explicit batch/history/retry actions, atomic manual-note CSV imports, snapshot research exports and sparse nonsecret preferences. GET paths remain read-only; provider connectivity checks and AI spend enforcement remain separate future work.
+
 **Embedded history implementation:** [Research History](RESEARCH_HISTORY.md) unifies completed reports, saved scenarios and versioned manual notes inside Overview and the right Drawer. Reads project original snapshots without recalculation; tracked-stock/date/type/keyword filters, same-series comparison and chronological chart markers reuse the existing immutable tables. Manual note saving appends an explicit version and quote snapshot.
 
 **Valuation implementation:** [Valuation & Entry Intelligence](VALUATION.md) defines `valuation-v1`: deterministic Decimal annual P/E, equity P/S and direct user-estimate scenarios; Bear/Base/Bull comparison; publication/retrieval-bounded snapshots; immutable `EntryScenario` versions; cache-only source reads; explicit Calculate/Save APIs; and the Overview editor. This supersedes the audit's unresolved entry-method proposal for these methods only.
